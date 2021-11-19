@@ -3,11 +3,17 @@ package com.uzair.dropdownsectionrecyclerview;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
-import android.widget.LinearLayout;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -15,6 +21,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements BaseAdapter.OnItemClickListener {
@@ -22,10 +29,14 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
     RecyclerView recyclerView;
     LinearLayoutManager layoutManager;
     DatabaseReference dbRef;
-    private SqliteClient client;
-    private List<Items> itemList;
+    SqliteClient client;
+    List<Items> itemList;
+    List<String> productsName;
     ItemListAdapter adapter;
     SearchView searchView;
+    ListView productNameList;
+    ArrayAdapter listViewAdapter;
+    DrawerLayout drawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +44,22 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
         setContentView(R.layout.activity_main);
 
         initViews();
+
+        productNameList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (position <= adapter.getSectionsCount()) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    adapter.collapseAllSections();
+                    recyclerView.scrollToPosition(adapter.getSectionSubheaderPosition(position));
+                    adapter.expandSection(position);
+                }
+                else {
+                    Toast.makeText(MainActivity.this, "Sorry! No Items in "+parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
 
         /// search view
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -50,9 +77,10 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
 
     }
 
-    private void initViews()
-    {
-        searchView  = findViewById(R.id.searchView);
+    private void initViews() {
+
+        drawerLayout = findViewById(R.id.drawerLayout);
+        searchView = findViewById(R.id.searchView);
         dbRef = FirebaseDatabase.getInstance().getReference();
         client = new SqliteClient(this);
         getAllProducts();
@@ -61,12 +89,19 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
         itemList = client.getAllItems();
 
 
+        /// side menu show products name
+        productsName = new ArrayList<>();
+        productNameList = findViewById(R.id.productList);
+
+        listViewAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_expandable_list_item_1, productsName);
+        productNameList.setAdapter(listViewAdapter);
+
+        /// recycler view
         recyclerView = findViewById(R.id.recyclerView);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
-
-
+        /// recycler view adapter
         adapter = new ItemListAdapter(itemList, this);
         adapter.setOnItemClickListener(this);
         recyclerView.setAdapter(adapter);
@@ -77,15 +112,14 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
     }
 
 
-    private void getAllProducts()
-    {
+    private void getAllProducts() {
         dbRef.child("Products")
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                        for (DataSnapshot query : snapshot.getChildren())
-                        {
+                        for (DataSnapshot query : snapshot.getChildren()) {
+                            productsName.add(String.valueOf(query.child("name").getValue()));
                             Product product = new Product();
                             product.setProductName(String.valueOf(query.child("name").getValue()));
                             product.setStatus(String.valueOf(query.child("status").getValue()));
@@ -95,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
 
                             client.insertProduct(product);
                         }
+                        listViewAdapter.notifyDataSetChanged();
 
 
 
@@ -107,14 +142,12 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
                 });
     }
 
-    private void getAllItems()
-    {
+    private void getAllItems() {
         dbRef.child("Items")
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for (DataSnapshot query : snapshot.getChildren())
-                        {
+                        for (DataSnapshot query : snapshot.getChildren()) {
                             Items items = new Items();
                             items.setItemName(String.valueOf(query.child("name").getValue()));
                             items.setProductId(Integer.parseInt(String.valueOf(query.child("productid").getValue())));
