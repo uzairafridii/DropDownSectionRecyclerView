@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,7 +23,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements BaseAdapter.OnItemClickListener {
 
@@ -45,18 +48,14 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
 
         initViews();
 
-        productNameList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position <= adapter.getSectionsCount()) {
-                    drawerLayout.closeDrawer(GravityCompat.START);
-                    adapter.collapseAllSections();
-                    recyclerView.scrollToPosition(adapter.getSectionSubheaderPosition(position));
-                    adapter.expandSection(position);
-                }
-                else {
-                    Toast.makeText(MainActivity.this, "Sorry! No Items in "+parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
-                }
+        productNameList.setOnItemClickListener((parent, view, position, id) -> {
+            if (position <= adapter.getSectionsCount()) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                adapter.collapseAllSections();
+                recyclerView.scrollToPosition(adapter.getSectionSubheaderPosition(position));
+                adapter.expandSection(position);
+            } else {
+                Toast.makeText(MainActivity.this, "Sorry! No Items in " + parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -65,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                adapter.getFilter().filter(query);
                 return false;
             }
 
@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
         adapter = new ItemListAdapter(itemList, this);
         adapter.setOnItemClickListener(this);
         recyclerView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
 //        adapter.collapseAllSections();
 //        adapter.expandSection(0);
 
@@ -130,7 +131,6 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
                             client.insertProduct(product);
                         }
                         listViewAdapter.notifyDataSetChanged();
-
 
 
                     }
@@ -180,5 +180,14 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
         } else {
             adapter.expandSection(adapter.getSectionIndex(position));
         }
+    }
+
+
+    public void continueBtn(View view) {
+        HashMap<Integer, Integer> itemMap = adapter.getItemDataMap();
+        for (Map.Entry<Integer, Integer> itemData : itemMap.entrySet()) {
+            Log.d("itemCtn", "continueBtn: " + itemData.getKey() + " : " + itemData.getValue());
+        }
+
     }
 }

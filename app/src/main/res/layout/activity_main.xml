@@ -23,6 +23,7 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_marginTop="4dp"
+        android:layout_above="@+id/continueBtn"
         android:layout_below="@id/searchView"
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
@@ -33,6 +34,14 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/continueBtn"
+            android:text="Continue"
+            android:onClick="continueBtn"
+            android:layout_alignParentBottom="true"
+            />
 
     </RelativeLayout>
 

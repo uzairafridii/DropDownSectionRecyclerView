@@ -1,5 +1,7 @@
 package com.uzair.dropdownsectionrecyclerview;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -91,6 +93,23 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
             edPcs = itemView.findViewById(R.id.edPcs);
             edBox = itemView.findViewById(R.id.edBox);
             itemImage = itemView.findViewById(R.id.itemImage);
+
+            edCtn.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
         }
     }
 

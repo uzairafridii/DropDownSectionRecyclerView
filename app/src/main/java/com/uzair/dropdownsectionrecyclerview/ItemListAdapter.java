@@ -1,6 +1,8 @@
 package com.uzair.dropdownsectionrecyclerview;
 
 import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.widget.Filter;
 import android.widget.Filterable;
@@ -9,6 +11,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ItemListAdapter extends BaseAdapter implements Filterable {
@@ -16,6 +19,7 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
     SqliteClient client;
     Context context;
     ImageLoader imageLoader;
+    HashMap<Integer, Integer> itemDataMap = new HashMap<>();
 
     public ItemListAdapter(List<Items> itemsList, Context context) {
         super();
@@ -41,11 +45,70 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
 
         Items items = mFilteredListCopy.get(itemPosition);
 
+
         childViewHolder.availableStock.setText("Stock Available : " + items.getBoxSize());
         childViewHolder.itemName.setText(items.getItemName());
         childViewHolder.itemSqCode.setText("SKU Code : " + items.getSkuCode());
         imageLoader.init(ImageLoaderConfiguration.createDefault(context));
         imageLoader.displayImage(items.getImageUrl(), childViewHolder.itemImage);
+
+        /// text change listener on edBox
+        childViewHolder.edBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if(!s.toString().isEmpty() || s.toString() != null) {
+                    int number = Integer.parseInt(s.toString());
+                    itemDataMap.put(items.getUid(), number);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        /// text change listener on edCtn
+        childViewHolder.edCtn.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        /// text change listener on edPcs
+        childViewHolder.edPcs.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
 
     }
@@ -65,12 +128,26 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
 
     }
 
+    @Override
+    public int getViewType(int position) {
+        return position;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
 
     @Override
     public int getItemSize() {
         Log.d("ItemSize", "getItemSize: " + mFilteredListCopy.size());
         return mFilteredListCopy.size();
     }
+
+    public HashMap<Integer, Integer> getItemDataMap() {
+        return itemDataMap;
+    }
+
 
     @Override
     public Filter getFilter() {
