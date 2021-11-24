@@ -126,6 +126,7 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
 //                            sectionList.get(groupPosition)).get(
 //                            childPosition), Toast.LENGTH_SHORT)
 //                    .show();
+
             drawerLayout.closeDrawer(GravityCompat.START);
             adapter.collapseAllSections();
             recyclerView.scrollToPosition(adapter.getSectionSubheaderPosition(childPosition));
@@ -316,8 +317,6 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
     public void onHeaderClick(int groupPosition, String groupName, boolean isExpanded) {
 
         if (!isExpanded) {
-            /// child name and position is get
-            // now move recycler view to that position
             SharedPref.storeType(groupName);
             sectionExpandedList.expandGroup(groupPosition);
             recyclerView.scrollToPosition(0);

@@ -1,5 +1,6 @@
 package com.uzair.dropdownsectionrecyclerview.adapter;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -61,7 +62,7 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
     @Override
     public void onBindItemViewHolder(ItemView childViewHolder, int itemPosition) {
 
-        Items items = itemsList.get(itemPosition);
+        Items items = mFilteredListCopy.get(itemPosition);
 
         childViewHolder.availableStock.setText("Stock Available : " + items.getBoxSize());
         childViewHolder.itemName.setText(items.getItemName());
@@ -209,7 +210,6 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
         protected void publishResults(CharSequence constraint, FilterResults filterResults) {
             mFilteredListCopy = (ArrayList<Items>) filterResults.values;
             notifyDataChanged();
-            //  notifyDataSetChanged();
 
             Log.d("TAG", "publishResults: " + mFilteredListCopy.size());
 
