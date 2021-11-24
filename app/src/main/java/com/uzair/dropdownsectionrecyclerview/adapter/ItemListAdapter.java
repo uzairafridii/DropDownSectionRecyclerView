@@ -1,4 +1,4 @@
-package com.uzair.dropdownsectionrecyclerview;
+package com.uzair.dropdownsectionrecyclerview.adapter;
 
 import android.content.Context;
 import android.text.Editable;
@@ -9,6 +9,10 @@ import android.widget.Filterable;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.uzair.dropdownsectionrecyclerview.R;
+import com.uzair.dropdownsectionrecyclerview.database.SqliteClient;
+import com.uzair.dropdownsectionrecyclerview.model.Items;
+import com.uzair.dropdownsectionrecyclerview.utils.SharedPref;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +30,7 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
         this.itemsList = itemsList;
         this.context = context;
         this.mFilteredListCopy = itemsList;
+        SharedPref.init(context);
         client = new SqliteClient(context);
         imageLoader = ImageLoader.getInstance();
 
@@ -34,8 +39,21 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
 
     @Override
     public boolean onPlaceSubheaderBetweenItems(int position) {
-        String previousHeader = String.valueOf(mFilteredListCopy.get(position).getProductId());
-        String nextHeader = String.valueOf(mFilteredListCopy.get(position + 1).getProductId());
+        String previousHeader = "", nextHeader = "";
+
+        if (SharedPref.getType().equals("Brand")) {
+            previousHeader = String.valueOf(mFilteredListCopy.get(position).getBranId());
+            nextHeader = String.valueOf(mFilteredListCopy.get(position + 1).getBranId());
+        } else if (SharedPref.getType().equals("Category")) {
+            previousHeader = client.getProductCategoryId(mFilteredListCopy.get(position).getProductId());
+            nextHeader = client.getProductCategoryId(mFilteredListCopy.get(position + 1).getProductId());
+        } else if (SharedPref.getType().equals("Group")) {
+            previousHeader = String.valueOf(mFilteredListCopy.get(position).getGroupId());
+            nextHeader = String.valueOf(mFilteredListCopy.get(position + 1).getGroupId());
+        } else if (SharedPref.getType().equals("Product")) {
+            previousHeader = String.valueOf(mFilteredListCopy.get(position).getProductId());
+            nextHeader = String.valueOf(mFilteredListCopy.get(position + 1).getProductId());
+        }
 
         return !previousHeader.equals(nextHeader);
     }
@@ -43,8 +61,7 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
     @Override
     public void onBindItemViewHolder(ItemView childViewHolder, int itemPosition) {
 
-        Items items = mFilteredListCopy.get(itemPosition);
-
+        Items items = itemsList.get(itemPosition);
 
         childViewHolder.availableStock.setText("Stock Available : " + items.getBoxSize());
         childViewHolder.itemName.setText(items.getItemName());
@@ -62,7 +79,7 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                if(!s.toString().isEmpty() || s.toString() != null) {
+                if (!s.toString().isEmpty() || s.toString() != null) {
                     int number = Integer.parseInt(s.toString());
                     itemDataMap.put(items.getUid(), number);
                 }
@@ -117,7 +134,18 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
     public void onBindSubheaderViewHolder(HeaderView subheaderHolder, int nextItemPosition) {
         super.onBindSubheaderViewHolder(subheaderHolder, nextItemPosition);
 
-        String nextItem = client.getProductNameById(mFilteredListCopy.get(nextItemPosition).getProductId());
+        String nextItem = "";
+
+        if (SharedPref.getType().equals("Brand")) {
+            nextItem = client.getProductBrand(String.valueOf(mFilteredListCopy.get(nextItemPosition).getBranId()));
+        } else if (SharedPref.getType().equals("Category")) {
+            nextItem = client.getProductCategoryName(mFilteredListCopy.get(nextItemPosition).getProductId());
+        } else if (SharedPref.getType().equals("Group")) {
+            nextItem = client.getItemGroupById(mFilteredListCopy.get(nextItemPosition).getGroupId());
+        } else if (SharedPref.getType().equals("Product")) {
+            nextItem = client.getProductNameById(mFilteredListCopy.get(nextItemPosition).getProductId());
+        }
+
         final int sectionSize = getSectionSize(getSectionIndex(subheaderHolder.getAdapterPosition()));
         final String subheaderText = String.format(
                 context.getString(R.string.subheader),
@@ -128,19 +156,18 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
 
     }
 
-    @Override
-    public int getViewType(int position) {
-        return position;
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
+//    @Override
+//    public int getViewType(int position) {
+//        return position;
+//    }
+//
+//    @Override
+//    public long getItemId(int position) {
+//        return position;
+//    }
 
     @Override
     public int getItemSize() {
-        Log.d("ItemSize", "getItemSize: " + mFilteredListCopy.size());
         return mFilteredListCopy.size();
     }
 

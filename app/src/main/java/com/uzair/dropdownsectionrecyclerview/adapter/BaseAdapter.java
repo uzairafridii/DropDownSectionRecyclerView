@@ -1,7 +1,5 @@
-package com.uzair.dropdownsectionrecyclerview;
+package com.uzair.dropdownsectionrecyclerview.adapter;
 
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.uzair.dropdownsectionrecyclerview.R;
+import com.uzair.dropdownsectionrecyclerview.model.Items;
 import com.zhukic.sectionedrecyclerview.SectionedRecyclerViewAdapter;
-
-import java.util.List;
 
 public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapter.HeaderView, BaseAdapter.ItemView> {
 
@@ -48,12 +45,10 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
         } else {
             subheaderHolder.mArrow.setImageDrawable(ContextCompat.getDrawable(subheaderHolder.itemView.getContext(), R.drawable.ic_baseline_keyboard_arrow_down_24));
         }
-
         subheaderHolder.itemView.setOnClickListener(v -> onItemClickListener.onSubheaderClicked(subheaderHolder.getAdapterPosition()));
+
+
     }
-
-
-
 
 
 //    @Override
@@ -62,22 +57,23 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
 //    }
 
 
-
     /// header view holder
-    public class HeaderView extends RecyclerView.ViewHolder {
+    public static class HeaderView extends RecyclerView.ViewHolder {
 
-        TextView headerTitle;
-        ImageView mArrow;
+        public TextView headerTitle;
+        public ImageView mArrow;
 
         public HeaderView(@NonNull View itemView) {
             super(itemView);
-            headerTitle  = itemView.findViewById(R.id.headerText);
+            headerTitle = itemView.findViewById(R.id.headerText);
             mArrow = itemView.findViewById(R.id.arrow);
         }
     }
 
     /// item view holder
-    public class ItemView extends RecyclerView.ViewHolder {
+    public static class ItemView extends RecyclerView.ViewHolder {
+
+       // public RecyclerView groupBySection;
 
         public TextView itemName, itemSqCode, availableStock, totalPcs;
         public ImageView itemImage;
@@ -85,6 +81,7 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
 
         public ItemView(@NonNull View itemView) {
             super(itemView);
+        //    groupBySection = itemView.findViewById(R.id.rvGroupsSection);
             totalPcs = itemView.findViewById(R.id.totalPcs);
             availableStock = itemView.findViewById(R.id.availableStock);
             itemName = itemView.findViewById(R.id.itemName);
@@ -94,22 +91,7 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
             edBox = itemView.findViewById(R.id.edBox);
             itemImage = itemView.findViewById(R.id.itemImage);
 
-            edCtn.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-
-                }
-            });
         }
     }
 
@@ -121,6 +103,7 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
     /// interface for item click
     public interface OnItemClickListener {
         void onItemClicked(Items item);
+
         void onSubheaderClicked(int position);
     }
 

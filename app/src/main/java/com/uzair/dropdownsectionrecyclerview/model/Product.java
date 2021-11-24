@@ -1,4 +1,4 @@
-package com.uzair.dropdownsectionrecyclerview;
+package com.uzair.dropdownsectionrecyclerview.model;
 
 public class Product {
     private String productName, status;
