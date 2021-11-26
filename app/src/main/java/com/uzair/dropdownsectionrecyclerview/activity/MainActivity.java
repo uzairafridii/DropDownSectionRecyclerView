@@ -3,29 +3,23 @@ package com.uzair.dropdownsectionrecyclerview.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.core.view.GravityCompat;
-import androidx.core.view.ViewCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.FrameLayout;
 
-import com.github.aakira.expandablelayout.ExpandableLinearLayout;
-import com.google.android.material.navigation.NavigationView;
+//import com.github.aakira.expandablelayout.ExpandableLinearLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.uzair.dropdownsectionrecyclerview.R;
+import com.uzair.dropdownsectionrecyclerview.utils.SlidingDrawer;
 import com.uzair.dropdownsectionrecyclerview.adapter.BaseAdapter;
 import com.uzair.dropdownsectionrecyclerview.adapter.ExpandedListAdapter;
 import com.uzair.dropdownsectionrecyclerview.adapter.ItemListAdapter;
@@ -47,28 +41,31 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity implements BaseAdapter.OnItemClickListener,
         ExpandedListAdapter.OnHeaderClickListener {
 
-
     RecyclerView recyclerView;
     LinearLayoutManager layoutManager;
     DatabaseReference dbRef;
     SqliteClient client;
     List<Items> itemList;
-    //    List<ProductCategory> categoryList;
-//    List<ItemGroup> itemsGroupList;
     List<String> productBrandsList, productsName, categoryList, groupList;
     ItemListAdapter adapter;
     SearchView searchView;
-    DrawerLayout drawerLayout;
+  //  DrawerLayout drawerLayout;
     ExpandableListView sectionExpandedList;
-
+    SlidingDrawer slidingDrawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        slidingDrawer = findViewById(R.id.drawer);
+
         initViews();
         sectionSetup();
+
+
+
 
         /// search view
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -118,39 +115,41 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
         sectionExpandedList.setAdapter(sectionAdapter);
 
         sectionExpandedList.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
-//            Toast.makeText(
-//                    getApplicationContext(),
-//                    sectionList.get(groupPosition)
-//                            + " : "
-//                            + listDataChild.get(
-//                            sectionList.get(groupPosition)).get(
-//                            childPosition), Toast.LENGTH_SHORT)
-//                    .show();
-
-            drawerLayout.closeDrawer(GravityCompat.START);
+//            drawerLayout.closeDrawer(GravityCompat.START);
+            slidingDrawer.animateClose();
             adapter.collapseAllSections();
+
             recyclerView.scrollToPosition(adapter.getSectionSubheaderPosition(childPosition));
             adapter.expandSection(childPosition);
             return false;
         });
+
+
+        /// nav and drawer size setup
+        double width = getResources().getDisplayMetrics().widthPixels / 1.5;
+        FrameLayout layout = findViewById(R.id.content_c);
+        SlidingDrawer.LayoutParams params = (SlidingDrawer.LayoutParams) slidingDrawer.getLayoutParams();
+        params.width = (int) width;
+        layout.setLayoutParams(params);
+
 
     }
 
     private void initViews() {
 
         SharedPref.init(this);
-        drawerLayout = findViewById(R.id.drawerLayout);
+
         searchView = findViewById(R.id.searchView);
         dbRef = FirebaseDatabase.getInstance().getReference();
         client = new SqliteClient(this);
-        getAllProducts();
         getAllItems();
+        getAllProducts();
         getAllItemsGroup();
         getProductsBrand();
         getProductCategory();
 
         /// recycler view
-        itemList = client.getAllItems();
+        itemList = client.getAllItems(Contracts.Items.COL_PRODUCT_ID, Contracts.Items.COL_BRAND_ID);
         recyclerView = findViewById(R.id.recyclerView);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
@@ -291,8 +290,7 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
 
 
     @Override
-    public void onItemClicked(Items item) {
-    }
+    public void onItemClicked(Items item) {}
 
     @Override
     public void onSubheaderClicked(int position) {
@@ -316,6 +314,30 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
     @Override
     public void onHeaderClick(int groupPosition, String groupName, boolean isExpanded) {
 
+        switch (groupName) {
+            case "Product":
+            case "Category": {
+                itemList = client.getAllItems(Contracts.Items.COL_PRODUCT_ID, Contracts.Items.COL_BRAND_ID);
+                updateRecycler(isExpanded, groupName, groupPosition);
+                break;
+            }
+
+            case "Brand": {
+                itemList = client.getAllItems(Contracts.Items.COL_BRAND_ID, Contracts.Items.COL_PRODUCT_ID);
+                updateRecycler(isExpanded, groupName, groupPosition);
+                break;
+            }
+            case "Group": {
+                itemList = client.getAllItems(Contracts.Items.COL_GROUP_ID, Contracts.Items.COL_PRODUCT_ID);
+                updateRecycler(isExpanded, groupName, groupPosition);
+                break;
+            }
+        }
+
+
+    }
+
+    private void updateRecycler(boolean isExpanded, String groupName, int groupPosition) {
         if (!isExpanded) {
             SharedPref.storeType(groupName);
             sectionExpandedList.expandGroup(groupPosition);
@@ -323,9 +345,8 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
             adapter.notifyDataChanged();
         } else {
             sectionExpandedList.collapseGroup(groupPosition);
-            adapter.notifyDataChanged();
         }
-
     }
+
 
 }

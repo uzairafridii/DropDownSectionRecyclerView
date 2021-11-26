@@ -35,26 +35,35 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
         client = new SqliteClient(context);
         imageLoader = ImageLoader.getInstance();
 
-
     }
 
     @Override
     public boolean onPlaceSubheaderBetweenItems(int position) {
         String previousHeader = "", nextHeader = "";
 
-        if (SharedPref.getType().equals("Brand")) {
-            previousHeader = String.valueOf(mFilteredListCopy.get(position).getBranId());
-            nextHeader = String.valueOf(mFilteredListCopy.get(position + 1).getBranId());
-        } else if (SharedPref.getType().equals("Category")) {
-            previousHeader = client.getProductCategoryId(mFilteredListCopy.get(position).getProductId());
-            nextHeader = client.getProductCategoryId(mFilteredListCopy.get(position + 1).getProductId());
-        } else if (SharedPref.getType().equals("Group")) {
-            previousHeader = String.valueOf(mFilteredListCopy.get(position).getGroupId());
-            nextHeader = String.valueOf(mFilteredListCopy.get(position + 1).getGroupId());
-        } else if (SharedPref.getType().equals("Product")) {
-            previousHeader = String.valueOf(mFilteredListCopy.get(position).getProductId());
-            nextHeader = String.valueOf(mFilteredListCopy.get(position + 1).getProductId());
+        switch (SharedPref.getType()) {
+            case "Brand": {
+                previousHeader = String.valueOf(mFilteredListCopy.get(position).getBranId());
+                nextHeader = String.valueOf(mFilteredListCopy.get(position + 1).getBranId());
+                break;
+            }
+            case "Category": {
+                previousHeader = client.getProductCategoryId(mFilteredListCopy.get(position).getProductId());
+                nextHeader = client.getProductCategoryId(mFilteredListCopy.get(position + 1).getProductId());
+                break;
+            }
+            case "Group": {
+                previousHeader = String.valueOf(mFilteredListCopy.get(position).getGroupId());
+                nextHeader = String.valueOf(mFilteredListCopy.get(position + 1).getGroupId());
+                break;
+            }
+            case "Product": {
+                previousHeader = String.valueOf(mFilteredListCopy.get(position).getProductId());
+                nextHeader = String.valueOf(mFilteredListCopy.get(position + 1).getProductId());
+                break;
+            }
         }
+
 
         return !previousHeader.equals(nextHeader);
     }
@@ -137,14 +146,24 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
 
         String nextItem = "";
 
-        if (SharedPref.getType().equals("Brand")) {
-            nextItem = client.getProductBrand(String.valueOf(mFilteredListCopy.get(nextItemPosition).getBranId()));
-        } else if (SharedPref.getType().equals("Category")) {
-            nextItem = client.getProductCategoryName(mFilteredListCopy.get(nextItemPosition).getProductId());
-        } else if (SharedPref.getType().equals("Group")) {
-            nextItem = client.getItemGroupById(mFilteredListCopy.get(nextItemPosition).getGroupId());
-        } else if (SharedPref.getType().equals("Product")) {
-            nextItem = client.getProductNameById(mFilteredListCopy.get(nextItemPosition).getProductId());
+        switch (SharedPref.getType()) {
+            case "Brand": {
+                nextItem = client.getProductBrand(String.valueOf(mFilteredListCopy.get(nextItemPosition).getBranId()));
+                break;
+            }
+            case "Category": {
+                nextItem = client.getProductCategoryName(mFilteredListCopy.get(nextItemPosition).getProductId());
+                break;
+            }
+            case "Group": {
+                nextItem = client.getItemGroupById(mFilteredListCopy.get(nextItemPosition).getGroupId());
+                break;
+            }
+            case "Product": {
+                nextItem = client.getProductNameById(mFilteredListCopy.get(nextItemPosition).getProductId());
+                break;
+            }
+
         }
 
         final int sectionSize = getSectionSize(getSectionIndex(subheaderHolder.getAdapterPosition()));
@@ -210,11 +229,6 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
         protected void publishResults(CharSequence constraint, FilterResults filterResults) {
             mFilteredListCopy = (ArrayList<Items>) filterResults.values;
             notifyDataChanged();
-
-            Log.d("TAG", "publishResults: " + mFilteredListCopy.size());
-
-            for (int i = 0; i < mFilteredListCopy.size(); i++)
-                Log.d("searchItemList", "publishResults: " + mFilteredListCopy.get(i).getItemName());
         }
     };
 }

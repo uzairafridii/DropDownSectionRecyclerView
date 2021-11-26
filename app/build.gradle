@@ -43,9 +43,6 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
     implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
 
-//    implementation 'com.github.cachapa:ExpandableLayout:2.9.2'
-//    implementation "com.github.skydoves:expandablelayout:1.0.7"
-    implementation 'com.github.aakira:expandable-layout:1.6.0@aar'
 
 
 }

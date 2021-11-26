@@ -22,7 +22,7 @@ import java.util.List;
 
 public class SqliteClient extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "shop.db";
-    public static final int DATABASE_VERSION = 35;
+    public static final int DATABASE_VERSION = 38;
     SQLiteDatabase sqliteDb;
 
 
@@ -162,14 +162,15 @@ public class SqliteClient extends SQLiteOpenHelper {
     }
 
     /// get items list
-    public List<Items> getAllItems() {
+    public List<Items> getAllItems(String columnOne , String columnTwo) {
         SQLiteDatabase db = this.getReadableDatabase();
         List<Items> list = new ArrayList<>();
-        Cursor cursor = db.rawQuery("Select * from " + Contracts.Items.COL_TABLE_NAME +
-                " ORDER BY " + Contracts.Items.COL_PRODUCT_ID + " ASC ", null);
+        Cursor cursor = db.rawQuery(" Select * from " + Contracts.Items.COL_TABLE_NAME +
+                " ORDER BY "+columnOne+" , " +columnTwo + " ASC ", null);
 
         if (cursor.moveToFirst()) {
             do {
+
                 Items items = new Items();
                 items.setItemName(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_ITEM_NAME)));
                 items.setGroupId(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_GROUP_ID)));
@@ -299,7 +300,7 @@ public class SqliteClient extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("Select * from " + Contracts.ProductsBrand.COL_TABLE_NAME
                 +  " ORDER BY "
-                + Contracts.ProductsBrand.COL_BRAND_ID + " ASC ", null);
+                + Contracts.ProductsBrand.COL_PRODUCT_ID + " ASC ", null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -352,11 +353,8 @@ public class SqliteClient extends SQLiteOpenHelper {
         List<String> itemGroupList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("Select * from " + Contracts.ItemGroup.COL_TABLE_NAME
-                +" ORDER BY "+ Contracts.ItemGroup.COL_GROUP_ID + " ASC ", null);
+                +" ORDER BY "+ Contracts.ItemGroup.COL_GROUP_ID + " , "+Contracts.Items.COL_BRAND_ID+" ASC ", null);
 
-//        Cursor cursor = db.rawQuery("Select * from " + Contracts.ItemGroup.COL_TABLE_NAME + " ig INNER JOIN " +
-//                Contracts.Items.COL_TABLE_NAME + " pd on  ig.brand_id = pd.brand_id  ORDER BY ig.group_id ", null);
-//
 
         if (cursor.moveToFirst()) {
             do {
