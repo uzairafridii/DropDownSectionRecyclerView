@@ -80,15 +80,6 @@ public class SlidingDrawer extends ViewGroup
     private final int mMaximumAcceleration;
     private final int mVelocityUnits;
 
-    /**
-     * Construct a <code>MultipleOrientationSlidingDrawer</code> object programmatically with the specified
-     * <code>handle</code>, <code>content</code> and <code>orientation</code>.
-     *
-     * @param context Activity context
-     * @param handle  Cannot be <code>null</code>
-     * @param content Cannot be <code>null</code>
-     * @param orientation TOP, LEFT, BOTTOM or RIGHT.
-     */
     public SlidingDrawer(Context context, View handle, View content, Orientation orientation) {
         super( context );
 
@@ -117,23 +108,10 @@ public class SlidingDrawer extends ViewGroup
         mVelocityUnits = (int) (VELOCITY_UNITS * density + 0.5f);
     }
 
-    /**
-     * Creates a new SlidingDrawer from a specified set of attributes defined in XML.
-     *
-     * @param context The application's environment.
-     * @param attrs The attributes defined in XML.
-     */
     public SlidingDrawer(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    /**
-     * Creates a new SlidingDrawer from a specified set of attributes defined in XML.
-     *
-     * @param context The application's environment.
-     * @param attrs The attributes defined in XML.
-     * @param defStyle The style to apply to this widget.
-     */
     public SlidingDrawer(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SlidingDrawer, defStyle, 0);
@@ -213,12 +191,6 @@ public class SlidingDrawer extends ViewGroup
 
     /**
      * Change the handle positioning of the sliding tray at runtime.
-     * <p/>
-     * HandlePos must be {@link Side#TOP}, {@link Side#CENTER} or {@link Side#BOTTOM} for horizontal orientation
-     * or must be {@link Side#LEFT}, {@link Side#CENTER} or {@link Side#RIGHT} for vertical orientation.
-     * <p/>
-     * Default is {@linkplain Side#CENTER}.
-     * @param side Handle Pos of the drawer handle.
      */
     public void setHandlePosition (Side side) {
         mHandlePos = side;
@@ -228,7 +200,6 @@ public class SlidingDrawer extends ViewGroup
 
     /**
      * Add padding to drawer handle when handle is not centered.
-     * <p/>
      * Note this padding is only effective when handle is not centered.
      * @param padding padding in pixels.
      */
@@ -606,9 +577,7 @@ public class SlidingDrawer extends ViewGroup
                 }
             }
         } else {
-            //else if (!always && (velocity > mMaximumMajorVelocity ||
-            //		(position > (mVertical ? getHeight() : getWidth()) / 2 &&
-            //				velocity > -mMaximumMajorVelocity))) {
+
             if ((velocity > mMaximumMajorVelocity ||
                     (position > (mVertical ? getHeight() : getWidth()) / 2 &&
                             velocity > -mMaximumMajorVelocity))) {
@@ -627,8 +596,7 @@ public class SlidingDrawer extends ViewGroup
             }
         }
 
-//		if (mInvert)
-//			mAnimatedAcceleration *= -1;
+
         long now = SystemClock.uptimeMillis();
         mAnimationLastTime = now;
         mCurrentAnimationTime = now + ANIMATION_FRAME_DURATION;
@@ -817,8 +785,6 @@ public class SlidingDrawer extends ViewGroup
             measureContent();
         }
 
-        // Try only once... we should really loop but it's not a big deal
-        // if the draw was cancelled, it will only be temporary anyway
         content.getViewTreeObserver().dispatchOnPreDraw();
         content.buildDrawingCache();
 
@@ -1195,9 +1161,6 @@ public class SlidingDrawer extends ViewGroup
             if (mLocked) {
                 return;
             }
-            // mAllowSingleTap isn't relevant here; you're *always*
-            // allowed to open/close the drawer by clicking with the
-            // trackball.
 
             if (mAnimateOnClick) {
                 animateToggle();

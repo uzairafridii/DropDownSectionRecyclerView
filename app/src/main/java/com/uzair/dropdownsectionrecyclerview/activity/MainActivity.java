@@ -8,9 +8,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ExpandableListView;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 //import com.github.aakira.expandablelayout.ExpandableLinearLayout;
 import com.google.firebase.database.DataSnapshot;
@@ -49,23 +55,17 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
     List<String> productBrandsList, productsName, categoryList, groupList;
     ItemListAdapter adapter;
     SearchView searchView;
-  //  DrawerLayout drawerLayout;
     ExpandableListView sectionExpandedList;
     SlidingDrawer slidingDrawer;
+    ImageView handleImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        slidingDrawer = findViewById(R.id.drawer);
-
         initViews();
         sectionSetup();
-
-
-
 
         /// search view
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -87,58 +87,73 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
 
     private void sectionSetup() {
 
-
-        /// side menu show products name
+        /// side sections name list
         groupList = client.getItemGroupList();
         productsName = client.getProductNameList();
         productBrandsList = client.getProductBrandList();
         categoryList = client.getProductCategoryNameList();
 
-        HashMap<String, List<String>> listDataChild = new HashMap<>();
-
+        // section header list and child list
         List<String> sectionList = new ArrayList<>();
         sectionList.add("Product");
         sectionList.add("Brand");
         sectionList.add("Group");
         sectionList.add("Category");
 
-        listDataChild.put(sectionList.get(0).toString(), productsName);
-        listDataChild.put(sectionList.get(1).toString(), productBrandsList);
-        listDataChild.put(sectionList.get(2).toString(), groupList);
-        listDataChild.put(sectionList.get(3).toString(), categoryList);
+        HashMap<String, List<String>> listDataChild = new HashMap<>();
+        listDataChild.put(sectionList.get(0), productsName);
+        listDataChild.put(sectionList.get(1), productBrandsList);
+        listDataChild.put(sectionList.get(2), groupList);
+        listDataChild.put(sectionList.get(3), categoryList);
 
-
+        /// expanded list view and adapter
         sectionExpandedList = findViewById(R.id.sectionMenuList);
         ExpandedListAdapter sectionAdapter = new ExpandedListAdapter(MainActivity.this,
                 sectionList, listDataChild, this);
-
         sectionExpandedList.setAdapter(sectionAdapter);
-
+        /// set onChild click on expanded list
         sectionExpandedList.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
-//            drawerLayout.closeDrawer(GravityCompat.START);
-            slidingDrawer.animateClose();
-            adapter.collapseAllSections();
-
-            recyclerView.scrollToPosition(adapter.getSectionSubheaderPosition(childPosition));
-            adapter.expandSection(childPosition);
+            if (childPosition < adapter.getSectionsCount()) {
+                slidingDrawer.animateClose();
+                adapter.collapseAllSections();
+                recyclerView.scrollToPosition(adapter.getSectionSubheaderPosition(childPosition));
+                adapter.expandSection(childPosition);
+            } else {
+                Toast.makeText(MainActivity.this, "No Section Found", Toast.LENGTH_SHORT).show();
+            }
             return false;
         });
 
 
         /// nav and drawer size setup
+        handleImage = findViewById(R.id.handle_id);
+        slidingDrawer = findViewById(R.id.drawer);
         double width = getResources().getDisplayMetrics().widthPixels / 1.5;
         FrameLayout layout = findViewById(R.id.content_c);
-        SlidingDrawer.LayoutParams params = (SlidingDrawer.LayoutParams) slidingDrawer.getLayoutParams();
+        SlidingDrawer.LayoutParams params = slidingDrawer.getLayoutParams();
         params.width = (int) width;
         layout.setLayoutParams(params);
+
+        // click on sliding drawer
+        slidingDrawer.setOnDrawerCloseListener(() -> {
+            float deg = handleImage.getRotation() + 180F;
+            handleImage.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
+        });
+
+        slidingDrawer.setOnDrawerOpenListener(() -> {
+            float deg = (handleImage.getRotation() == 180F) ? 0F : 180F;
+            handleImage.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
+
+
+        });
 
 
     }
 
     private void initViews() {
-
+        /// pref
         SharedPref.init(this);
-
+        // views ,db and get all data
         searchView = findViewById(R.id.searchView);
         dbRef = FirebaseDatabase.getInstance().getReference();
         client = new SqliteClient(this);
@@ -168,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                        /// insert product category in sqlite database from firebase
                         for (DataSnapshot query : snapshot.getChildren()) {
                             ProductCategory category = new ProductCategory();
                             category.setName(String.valueOf(query.child("name").getValue()));
@@ -192,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                        /// insert product in sqlite database from firebase
                         for (DataSnapshot query : snapshot.getChildren()) {
                             Product product = new Product();
                             product.setProductName(String.valueOf(query.child("name").getValue()));
@@ -218,6 +235,8 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        /// insert item in sqlite database from firebase
+
                         for (DataSnapshot query : snapshot.getChildren()) {
                             Items items = new Items();
                             items.setBranId(String.valueOf(query.child("bran_id").getValue()));
@@ -246,6 +265,7 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        /// insert item group in sqlite database from firebase
 
                         for (DataSnapshot query : snapshot.getChildren()) {
                             ItemGroup itemGroup = new ItemGroup();
@@ -270,6 +290,7 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        /// insert product brand in sqlite database from firebase
 
                         for (DataSnapshot query : snapshot.getChildren()) {
                             ProductBrand productBrand = new ProductBrand();
@@ -290,17 +311,18 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
 
 
     @Override
-    public void onItemClicked(Items item) {}
+    public void onItemClicked(Items item) {
+    }
 
     @Override
     public void onSubheaderClicked(int position) {
+        //expand and collapse item list header
         if (adapter.isSectionExpanded(adapter.getSectionIndex(position))) {
             adapter.collapseSection(adapter.getSectionIndex(position));
         } else {
             adapter.expandSection(adapter.getSectionIndex(position));
         }
     }
-
 
     public void continueBtn(View view) {
         HashMap<Integer, Integer> itemMap = adapter.getItemDataMap();
@@ -338,6 +360,7 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
     }
 
     private void updateRecycler(boolean isExpanded, String groupName, int groupPosition) {
+        /// update the recycler by brand, group , product and category
         if (!isExpanded) {
             SharedPref.storeType(groupName);
             sectionExpandedList.expandGroup(groupPosition);

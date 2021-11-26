@@ -201,7 +201,6 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
         return searchFilter;
     }
 
-
     private Filter searchFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {

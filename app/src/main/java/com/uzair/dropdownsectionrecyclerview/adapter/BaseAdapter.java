@@ -51,11 +51,6 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
     }
 
 
-//    @Override
-//    public int getItemSize() {
-//        return itemsList.size();
-//    }
-
 
     /// header view holder
     public static class HeaderView extends RecyclerView.ViewHolder {
@@ -73,7 +68,6 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
     /// item view holder
     public static class ItemView extends RecyclerView.ViewHolder {
 
-       // public RecyclerView groupBySection;
 
         public TextView itemName, itemSqCode, availableStock, totalPcs;
         public ImageView itemImage;
@@ -81,7 +75,7 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
 
         public ItemView(@NonNull View itemView) {
             super(itemView);
-        //    groupBySection = itemView.findViewById(R.id.rvGroupsSection);
+
             totalPcs = itemView.findViewById(R.id.totalPcs);
             availableStock = itemView.findViewById(R.id.availableStock);
             itemName = itemView.findViewById(R.id.itemName);
