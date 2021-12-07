@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.View;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MainActivity extends AppCompatActivity implements BaseAdapter.OnItemClickListener,
         ExpandedListAdapter.OnHeaderClickListener {
@@ -65,7 +67,6 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
         setContentView(R.layout.activity_main);
 
         initViews();
-        sectionSetup();
 
         /// search view
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -134,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
         params.width = (int) width;
         layout.setLayoutParams(params);
 
-        // click on sliding drawer
+        // listener on sliding drawer handle
         slidingDrawer.setOnDrawerCloseListener(() -> {
             float deg = handleImage.getRotation() + 180F;
             handleImage.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
@@ -143,7 +144,6 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
         slidingDrawer.setOnDrawerOpenListener(() -> {
             float deg = (handleImage.getRotation() == 180F) ? 0F : 180F;
             handleImage.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
-
 
         });
 
@@ -164,17 +164,21 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
         getProductCategory();
 
         /// recycler view
-        itemList = client.getAllItems(Contracts.Items.COL_PRODUCT_ID, Contracts.Items.COL_BRAND_ID);
+        itemList = new ArrayList<>();
         recyclerView = findViewById(R.id.recyclerView);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         /// recycler view adapter
+        // setUpAdapter();
+
+
+    }
+
+    private void setUpAdapter() {
         adapter = new ItemListAdapter(itemList, this);
         adapter.setOnItemClickListener(this);
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
-
-
     }
 
     private void getProductCategory() {
@@ -325,16 +329,16 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
     }
 
     public void continueBtn(View view) {
-        HashMap<Integer, Integer> itemMap = adapter.getItemDataMap();
+        ConcurrentHashMap<Integer, Integer> itemMap = adapter.getItemDataMap();
         for (Map.Entry<Integer, Integer> itemData : itemMap.entrySet()) {
             Log.d("itemCtn", "continueBtn: " + itemData.getKey() + " : " + itemData.getValue());
         }
-
     }
 
 
     @Override
     public void onHeaderClick(int groupPosition, String groupName, boolean isExpanded) {
+
 
         switch (groupName) {
             case "Product":
@@ -366,10 +370,19 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
             sectionExpandedList.expandGroup(groupPosition);
             recyclerView.scrollToPosition(0);
             adapter.notifyDataChanged();
+           // setUpAdapter();
         } else {
             sectionExpandedList.collapseGroup(groupPosition);
         }
     }
 
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        itemList.addAll(client.getAllItems(Contracts.Items.COL_PRODUCT_ID, Contracts.Items.COL_BRAND_ID));
+        setUpAdapter();
+        sectionSetup();
+    }
 
 }

@@ -22,7 +22,7 @@ import java.util.List;
 
 public class SqliteClient extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "shop.db";
-    public static final int DATABASE_VERSION = 38;
+    public static final int DATABASE_VERSION = 1;
     SQLiteDatabase sqliteDb;
 
 
@@ -171,6 +171,7 @@ public class SqliteClient extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
 
+                Log.d("itemList", "getAllItems: "+cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_SKU_CODE)));
                 Items items = new Items();
                 items.setItemName(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_ITEM_NAME)));
                 items.setGroupId(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_GROUP_ID)));
@@ -300,7 +301,7 @@ public class SqliteClient extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("Select * from " + Contracts.ProductsBrand.COL_TABLE_NAME
                 +  " ORDER BY "
-                + Contracts.ProductsBrand.COL_PRODUCT_ID + " ASC ", null);
+                + Contracts.ProductsBrand.COL_PRODUCT_ID + " ,"+Contracts.ProductsBrand.COL_BRAND_ID+" ASC ", null);
 
         if (cursor.moveToFirst()) {
             do {

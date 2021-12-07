@@ -21,6 +21,6 @@ public class SharedPref
     }
 
     public static String getType() {
-        return mSharedPref.getString("type","product");
+        return mSharedPref.getString("type","Product");
     }
 }

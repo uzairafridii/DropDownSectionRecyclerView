@@ -1,12 +1,11 @@
 package com.uzair.dropdownsectionrecyclerview.adapter;
 
-import android.content.ClipData;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -16,15 +15,18 @@ import com.uzair.dropdownsectionrecyclerview.model.Items;
 import com.uzair.dropdownsectionrecyclerview.utils.SharedPref;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ItemListAdapter extends BaseAdapter implements Filterable {
     List<Items> itemsList, mFilteredListCopy;
     SqliteClient client;
     Context context;
     ImageLoader imageLoader;
-    HashMap<Integer, Integer> itemDataMap = new HashMap<>();
+    ConcurrentHashMap<Integer, Integer> itemDataMap = new ConcurrentHashMap<>();
+    List<String> idList = new ArrayList<>();
 
     public ItemListAdapter(List<Items> itemsList, Context context) {
         super();
@@ -34,6 +36,7 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
         SharedPref.init(context);
         client = new SqliteClient(context);
         imageLoader = ImageLoader.getInstance();
+        imageLoader.init(ImageLoaderConfiguration.createDefault(context));
 
     }
 
@@ -76,28 +79,36 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
         childViewHolder.availableStock.setText("Stock Available : " + items.getBoxSize());
         childViewHolder.itemName.setText(items.getItemName());
         childViewHolder.itemSqCode.setText("SKU Code : " + items.getSkuCode());
-        imageLoader.init(ImageLoaderConfiguration.createDefault(context));
         imageLoader.displayImage(items.getImageUrl(), childViewHolder.itemImage);
+
+        if(itemDataMap.containsKey(items.getUid())){
+            Toast.makeText(context, "Item Id : " + items.getUid(), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Item Qty : " + itemDataMap.get(items.getUid()), Toast.LENGTH_LONG).show();
+
+            childViewHolder.edBox.setText("" + itemDataMap.get(items.getUid()));
+        }
+        /// check in list if id is equal to item id then go inside and update the box
+        // if id is not exist then set edittext empty
+
 
         /// text change listener on edBox
         childViewHolder.edBox.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                if (!s.toString().isEmpty() || s.toString() != null) {
-                    int number = Integer.parseInt(s.toString());
+                if (!s.toString().isEmpty()) {
+                    int number = Integer.parseInt(s.toString().trim());
                     itemDataMap.put(items.getUid(), number);
+                    idList.add(String.valueOf(items.getUid()));
                 }
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-
             }
         });
 
@@ -176,22 +187,23 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
 
     }
 
-//    @Override
-//    public int getViewType(int position) {
-//        return position;
-//    }
-//
-//    @Override
-//    public long getItemId(int position) {
-//        return position;
-//    }
+    @Override
+    public int getViewType(int position) {
+        return position;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
 
     @Override
     public int getItemSize() {
         return mFilteredListCopy.size();
     }
 
-    public HashMap<Integer, Integer> getItemDataMap() {
+    public ConcurrentHashMap<Integer, Integer> getItemDataMap() {
         return itemDataMap;
     }
 
