@@ -337,7 +337,7 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
 
 
     @Override
-    public void onHeaderClick(int groupPosition, String groupName, boolean isExpanded) {
+2    public void onHeaderClick(int groupPosition, String groupName, boolean isExpanded) {
 
 
         switch (groupName) {

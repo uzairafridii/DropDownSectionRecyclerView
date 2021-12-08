@@ -41,6 +41,7 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
         boolean isSectionExpanded = isSectionExpanded(getSectionIndex(subheaderHolder.getAdapterPosition()));
 
         if (isSectionExpanded) {
+
             subheaderHolder.mArrow.setImageDrawable(ContextCompat.getDrawable(subheaderHolder.itemView.getContext(), R.drawable.ic_baseline_keyboard_arrow_up_24));
         } else {
             subheaderHolder.mArrow.setImageDrawable(ContextCompat.getDrawable(subheaderHolder.itemView.getContext(), R.drawable.ic_baseline_keyboard_arrow_down_24));
@@ -87,6 +88,9 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
 
 
         }
+
+
+
     }
 
 

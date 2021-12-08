@@ -26,7 +26,6 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
     Context context;
     ImageLoader imageLoader;
     ConcurrentHashMap<Integer, Integer> itemDataMap = new ConcurrentHashMap<>();
-    List<String> idList = new ArrayList<>();
 
     public ItemListAdapter(List<Items> itemsList, Context context) {
         super();
@@ -76,21 +75,6 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
 
         Items items = mFilteredListCopy.get(itemPosition);
 
-        childViewHolder.availableStock.setText("Stock Available : " + items.getBoxSize());
-        childViewHolder.itemName.setText(items.getItemName());
-        childViewHolder.itemSqCode.setText("SKU Code : " + items.getSkuCode());
-        imageLoader.displayImage(items.getImageUrl(), childViewHolder.itemImage);
-
-        if(itemDataMap.containsKey(items.getUid())){
-            Toast.makeText(context, "Item Id : " + items.getUid(), Toast.LENGTH_LONG).show();
-            Toast.makeText(context, "Item Qty : " + itemDataMap.get(items.getUid()), Toast.LENGTH_LONG).show();
-
-            childViewHolder.edBox.setText("" + itemDataMap.get(items.getUid()));
-        }
-        /// check in list if id is equal to item id then go inside and update the box
-        // if id is not exist then set edittext empty
-
-
         /// text change listener on edBox
         childViewHolder.edBox.addTextChangedListener(new TextWatcher() {
             @Override
@@ -103,7 +87,6 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
                 if (!s.toString().isEmpty()) {
                     int number = Integer.parseInt(s.toString().trim());
                     itemDataMap.put(items.getUid(), number);
-                    idList.add(String.valueOf(items.getUid()));
                 }
             }
 
@@ -149,6 +132,21 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
         });
 
 
+        if (itemDataMap.containsKey(items.getUid())) {
+            Toast.makeText(context, "Item Id : " + items.getUid(), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Item Qty : " + itemDataMap.get(items.getUid()), Toast.LENGTH_LONG).show();
+            childViewHolder.edBox.setText("" + itemDataMap.get(items.getUid()));
+        } else {
+            childViewHolder.edBox.setText("");
+        }
+
+
+        childViewHolder.availableStock.setText("Stock Available : " + items.getBoxSize());
+        childViewHolder.itemName.setText(items.getItemName());
+        childViewHolder.itemSqCode.setText("SKU Code : " + items.getSkuCode());
+        imageLoader.displayImage(items.getImageUrl(), childViewHolder.itemImage);
+
+
     }
 
     @Override
@@ -186,6 +184,7 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
         subheaderHolder.headerTitle.setText(subheaderText);
 
     }
+
 
     @Override
     public int getViewType(int position) {
