@@ -316,6 +316,7 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
 
     @Override
     public void onItemClicked(Items item) {
+        Toast.makeText(MainActivity.this, ""+item.getItemName(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
