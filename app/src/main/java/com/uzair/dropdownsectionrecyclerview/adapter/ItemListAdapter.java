@@ -64,6 +64,7 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
                 nextHeader = String.valueOf(mFilteredListCopy.get(position + 1).getProductId());
                 break;
             }
+
         }
 
 
