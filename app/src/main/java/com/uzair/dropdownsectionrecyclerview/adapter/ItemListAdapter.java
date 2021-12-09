@@ -3,6 +3,7 @@ package com.uzair.dropdownsectionrecyclerview.adapter;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.Toast;
@@ -146,6 +147,14 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
         childViewHolder.itemName.setText(items.getItemName());
         childViewHolder.itemSqCode.setText("SKU Code : " + items.getSkuCode());
         imageLoader.displayImage(items.getImageUrl(), childViewHolder.itemImage);
+
+        // click on item
+        childViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onItemClickListener.onItemClicked(items);
+            }
+        });
 
 
     }
