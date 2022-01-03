@@ -2,7 +2,7 @@
     <string name="app_name">DropDownSectionRecyclerView</string>
     <string name="subheader">%s (%s)</string>
     <plurals name="item">
-        <item quantity="one">%d item</item>
-        <item quantity="other">%d items</item>
+        <item quantity="one">%d Sku</item>
+        <item quantity="other">%d Skus</item>
     </plurals>
 </resources>

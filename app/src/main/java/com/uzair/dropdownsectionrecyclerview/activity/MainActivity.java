@@ -7,16 +7,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ExpandableListView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 //import com.github.aakira.expandablelayout.ExpandableLinearLayout;
@@ -38,13 +35,14 @@ import com.uzair.dropdownsectionrecyclerview.model.ProductBrand;
 import com.uzair.dropdownsectionrecyclerview.model.ProductCategory;
 import com.uzair.dropdownsectionrecyclerview.utils.Contracts;
 import com.uzair.dropdownsectionrecyclerview.utils.SharedPref;
+import com.uzair.dropdownsectionrecyclerview.utils.StickyHeader;
 
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class MainActivity extends AppCompatActivity implements BaseAdapter.OnItemClickListener,
         ExpandedListAdapter.OnHeaderClickListener {
@@ -84,7 +82,6 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
         });
 
     }
-
 
     private void sectionSetup() {
 
@@ -162,23 +159,29 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
         getAllItemsGroup();
         getProductsBrand();
         getProductCategory();
-
         /// recycler view
         itemList = new ArrayList<>();
+        itemList.addAll(client.getAllItems(Contracts.Items.COL_PRODUCT_ID, Contracts.Items.COL_BRAND_ID));
         recyclerView = findViewById(R.id.recyclerView);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         /// recycler view adapter
-        // setUpAdapter();
-
+        setUpAdapter();
+        sectionSetup();
 
     }
 
     private void setUpAdapter() {
+//        StickyHeader sectionItemDecoration =
+//                new StickyHeader(stickyHeaderCallBack(itemList));
+//        recyclerView.addItemDecoration(sectionItemDecoration);
+
         adapter = new ItemListAdapter(itemList, this);
+        adapter.setHasStableIds(false);
         adapter.setOnItemClickListener(this);
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
+        adapter.collapseAllSections();
     }
 
     private void getProductCategory() {
@@ -313,10 +316,9 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
                 });
     }
 
-
     @Override
     public void onItemClicked(Items item) {
-        Toast.makeText(MainActivity.this, ""+item.getItemName(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "" + item.getItemName(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -330,12 +332,11 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
     }
 
     public void continueBtn(View view) {
-        ConcurrentHashMap<Integer, Integer> itemMap = adapter.getItemDataMap();
+        LinkedHashMap<Integer, Integer> itemMap = adapter.getItemDataMap();
         for (Map.Entry<Integer, Integer> itemData : itemMap.entrySet()) {
             Log.d("itemCtn", "continueBtn: " + itemData.getKey() + " : " + itemData.getValue());
         }
     }
-
 
     @Override
     public void onHeaderClick(int groupPosition, String groupName, boolean isExpanded) {
@@ -371,19 +372,53 @@ public class MainActivity extends AppCompatActivity implements BaseAdapter.OnIte
             sectionExpandedList.expandGroup(groupPosition);
             recyclerView.scrollToPosition(0);
             adapter.notifyDataChanged();
-           // setUpAdapter();
+            // setUpAdapter();
         } else {
             sectionExpandedList.collapseGroup(groupPosition);
         }
     }
 
+    /// sticky header section call back method
+    private StickyHeader.SectionCallback stickyHeaderCallBack(List<Items> items) {
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        itemList.addAll(client.getAllItems(Contracts.Items.COL_PRODUCT_ID, Contracts.Items.COL_BRAND_ID));
-        setUpAdapter();
-        sectionSetup();
+        return new StickyHeader.SectionCallback() {
+            @Override
+            public boolean isHeader(int position) {
+                Log.d("sectionCounts", "isHeader: "+adapter.getSectionsCount());
+                Log.d("itemCounts", "isHeader: "+adapter.getItemCount());
+                if (position < items.size()) {
+                    return position == 0
+                            || items.get(position).getProductId() !=
+                            items.get(position - 1).getProductId();
+                }
+                return false;
+            }
+
+            @Override
+            public Integer getHeaderPositionForItem(Integer itemPosition) {
+                Integer headerPosition = 0;
+                for (Integer i = itemPosition; i > 0; i--) {
+                    if (isHeader(i)) {
+                        headerPosition = i;
+                        return headerPosition ;
+                    }
+                }
+                return headerPosition;
+            }
+
+            @Override
+            public Integer getHeaderLayout(Integer headerPosition) {
+                return R.layout.header_layout;
+            }
+
+            @Override
+            public void bindHeaderData(View header, Integer headerPosition) {
+                if (headerPosition < items.size()) {
+                    TextView headerTitle = header.findViewById(R.id.headerText);
+                    headerTitle.setText(client.getProductNameById(items.get(headerPosition).getProductId()));
+                }
+            }
+        };
     }
 
 }

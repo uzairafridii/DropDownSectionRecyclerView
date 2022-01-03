@@ -1,5 +1,7 @@
 package com.uzair.dropdownsectionrecyclerview.adapter;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +17,10 @@ import com.uzair.dropdownsectionrecyclerview.R;
 import com.uzair.dropdownsectionrecyclerview.model.Items;
 import com.zhukic.sectionedrecyclerview.SectionedRecyclerViewAdapter;
 
-public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapter.HeaderView, BaseAdapter.ItemView> {
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
+public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapter.HeaderView, BaseAdapter.ItemView> {
 
     OnItemClickListener onItemClickListener;
 
@@ -51,7 +55,6 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
     }
 
 
-
     /// header view holder
     public static class HeaderView extends RecyclerView.ViewHolder {
 
@@ -67,7 +70,6 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
 
     /// item view holder
     public static class ItemView extends RecyclerView.ViewHolder {
-
 
         public TextView itemName, itemSqCode, availableStock, totalPcs;
         public ImageView itemImage;
@@ -87,7 +89,6 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
 
 
         }
-
 
 
     }

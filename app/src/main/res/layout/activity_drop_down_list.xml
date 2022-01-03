@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.DropDownList">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <ImageButton
+            android:id="@+id/moreIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_baseline_apps_24"
+            app:tint="@color/black" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="12dp"
+            android:layout_toRightOf="@id/moreIcon"
+            android:gravity="center"
+            android:text="Header"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:paddingRight="12dp"
+            />
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            app:closeIcon="@drawable/clear"/>
+
+
+        <pokercc.android.expandablerecyclerview.StickyHeader
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/btnUp"
+            android:layout_below="@id/searchView">
+
+            <pokercc.android.expandablerecyclerview.ExpandableRecyclerView
+                android:id="@+id/recyclerViewStickyHeader"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </pokercc.android.expandablerecyclerview.StickyHeader>
+
+
+        <Button
+            android:id="@+id/btnUp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:onClick="btnUp"
+            android:text="Up" />
+
+
+        <Button
+            android:id="@+id/btnDown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginHorizontal="12dp"
+            android:layout_toRightOf="@id/btnUp"
+            android:onClick="btnDown"
+            android:text="Down" />
+
+
+    </RelativeLayout>
+
+    <include
+        android:id="@+id/bottomSheet"
+        layout="@layout/bottom_sheet_btn" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

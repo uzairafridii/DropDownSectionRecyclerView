@@ -1,5 +1,8 @@
 package com.uzair.dropdownsectionrecyclerview.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Product {
     private String productName, status;
     private int uid, categoryId, companyId;
@@ -14,6 +17,8 @@ public class Product {
         this.categoryId = categoryId;
         this.companyId = companyId;
     }
+
+
 
     public String getProductName() {
         return productName;

@@ -1062,6 +1062,7 @@ public class SlidingDrawer extends ViewGroup
         return mHandle;
     }
 
+
     /**
      * Convenience method to get the size of the handle.
      * May not return a valid size until the view is layed out.

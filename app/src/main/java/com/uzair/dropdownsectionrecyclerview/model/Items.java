@@ -1,8 +1,11 @@
 package com.uzair.dropdownsectionrecyclerview.model;
 
+import java.util.List;
+
 public class Items {
     private String itemName, imageUrl, skuCode, groupId, branId;
     private int uid , productId, boxSize, ctnSize;
+
 
     public Items() {
     }

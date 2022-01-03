@@ -1,8 +1,12 @@
 package com.uzair.dropdownsectionrecyclerview.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ItemGroup
 {
     private String brandId,groupCode,name, itemGroupId;
+    public List<Items> itemsList = new ArrayList<>();
 
     public ItemGroup() {}
 
@@ -11,6 +15,22 @@ public class ItemGroup
         this.groupCode = groupCode;
         this.name = name;
         this.itemGroupId = itemGroupId;
+    }
+
+    public ItemGroup(String brandId, String groupCode, String name, String itemGroupId, List<Items> itemsList) {
+        this.brandId = brandId;
+        this.groupCode = groupCode;
+        this.name = name;
+        this.itemGroupId = itemGroupId;
+        this.itemsList = itemsList;
+    }
+
+    public List<Items> getItemsList() {
+        return itemsList;
+    }
+
+    public void setItemsList(List<Items> itemsList) {
+        this.itemsList = itemsList;
     }
 
     public String getBrandId() {

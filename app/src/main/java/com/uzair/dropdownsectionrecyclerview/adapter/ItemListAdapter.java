@@ -1,24 +1,37 @@
 package com.uzair.dropdownsectionrecyclerview.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Build;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+
+import com.bumptech.glide.Glide;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.uzair.dropdownsectionrecyclerview.R;
 import com.uzair.dropdownsectionrecyclerview.database.SqliteClient;
 import com.uzair.dropdownsectionrecyclerview.model.Items;
 import com.uzair.dropdownsectionrecyclerview.utils.SharedPref;
+import com.uzair.dropdownsectionrecyclerview.utils.StickyHeader;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ItemListAdapter extends BaseAdapter implements Filterable {
@@ -26,7 +39,7 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
     SqliteClient client;
     Context context;
     ImageLoader imageLoader;
-    ConcurrentHashMap<Integer, Integer> itemDataMap = new ConcurrentHashMap<>();
+    LinkedHashMap<Integer, Integer> itemDataMap = new LinkedHashMap<>();
 
     public ItemListAdapter(List<Items> itemsList, Context context) {
         super();
@@ -65,18 +78,16 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
                 nextHeader = String.valueOf(mFilteredListCopy.get(position + 1).getProductId());
                 break;
             }
-
         }
-
-
         return !previousHeader.equals(nextHeader);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onBindItemViewHolder(ItemView childViewHolder, int itemPosition) {
 
         Items items = mFilteredListCopy.get(itemPosition);
-
+        Log.d("itemId", "onBindItemViewHolder: " + items.getUid());
         /// text change listener on edBox
         childViewHolder.edBox.addTextChangedListener(new TextWatcher() {
             @Override
@@ -134,27 +145,29 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
         });
 
 
-        if (itemDataMap.containsKey(items.getUid())) {
-            Toast.makeText(context, "Item Id : " + items.getUid(), Toast.LENGTH_LONG).show();
-            Toast.makeText(context, "Item Qty : " + itemDataMap.get(items.getUid()), Toast.LENGTH_LONG).show();
-            childViewHolder.edBox.setText("" + itemDataMap.get(items.getUid()));
-        } else {
-            childViewHolder.edBox.setText("");
-        }
 
+        // check for hashmap id if equal then get the value with key reference
+        //if (itemDataMap.containsKey(items.getUid())) {
+//        if ((new ArrayList<>(itemDataMap.keySet())).get(itemPosition).equals(items.getUid())) {
+//            childViewHolder.edBox.setText("" + itemDataMap.get(items.getUid()));
+//        }
+//            Toast.makeText(context, "Item Id : " + items.getUid(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Item Qty : " + itemDataMap.get(items.getUid()), Toast.LENGTH_LONG).show();
+//            childViewHolder.edBox.setText("" + itemDataMap.get(items.getUid()));
+//        }
+//        else {
+//            childViewHolder.edBox.setText("");
+//        }
 
+        /// set item values
         childViewHolder.availableStock.setText("Stock Available : " + items.getBoxSize());
         childViewHolder.itemName.setText(items.getItemName());
         childViewHolder.itemSqCode.setText("SKU Code : " + items.getSkuCode());
+
         imageLoader.displayImage(items.getImageUrl(), childViewHolder.itemImage);
 
         // click on item
-        childViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onItemClickListener.onItemClicked(items);
-            }
-        });
+        childViewHolder.itemView.setOnClickListener(v -> onItemClickListener.onItemClicked(items));
 
 
     }
@@ -195,7 +208,6 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
 
     }
 
-
     @Override
     public int getViewType(int position) {
         return position;
@@ -206,16 +218,14 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
         return position;
     }
 
-
     @Override
     public int getItemSize() {
         return mFilteredListCopy.size();
     }
 
-    public ConcurrentHashMap<Integer, Integer> getItemDataMap() {
+    public LinkedHashMap<Integer, Integer> getItemDataMap() {
         return itemDataMap;
     }
-
 
     @Override
     public Filter getFilter() {
@@ -251,4 +261,6 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
             notifyDataChanged();
         }
     };
+
+
 }

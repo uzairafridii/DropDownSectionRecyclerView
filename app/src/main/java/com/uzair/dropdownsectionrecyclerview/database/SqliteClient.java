@@ -15,6 +15,7 @@ import com.uzair.dropdownsectionrecyclerview.model.Items;
 import com.uzair.dropdownsectionrecyclerview.model.Product;
 import com.uzair.dropdownsectionrecyclerview.model.ProductBrand;
 import com.uzair.dropdownsectionrecyclerview.model.ProductCategory;
+import com.uzair.dropdownsectionrecyclerview.model.ProductItem;
 import com.uzair.dropdownsectionrecyclerview.utils.Contracts;
 
 import java.util.ArrayList;
@@ -22,13 +23,12 @@ import java.util.List;
 
 public class SqliteClient extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "shop.db";
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 11;
     SQLiteDatabase sqliteDb;
 
 
     public SqliteClient(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-
     }
 
     @Override
@@ -91,7 +91,10 @@ public class SqliteClient extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    //////*********************** PRODUCT TABLE************/////////////////
+    /**
+     * ********** PRODUCT TABLE************
+     * @param product
+     */
     public void insertProduct(Product product) {
         sqliteDb = this.getWritableDatabase();
         ContentValues productCv = new ContentValues();
@@ -144,8 +147,11 @@ public class SqliteClient extends SQLiteOpenHelper {
         return productNameList;
     }
 
-
-    //////*********************** ITEMS TABLE************/////////////////
+    /**
+     * ************ ITEMS TABLE************
+     * @param item
+     */
+    //////***********/////////////////
     public void insertItems(Items item) {
         sqliteDb = this.getWritableDatabase();
         ContentValues itemContentValue = new ContentValues();
@@ -162,16 +168,16 @@ public class SqliteClient extends SQLiteOpenHelper {
     }
 
     /// get items list
-    public List<Items> getAllItems(String columnOne , String columnTwo) {
+    public List<Items> getAllItems(String columnOne, String columnTwo) {
         SQLiteDatabase db = this.getReadableDatabase();
         List<Items> list = new ArrayList<>();
         Cursor cursor = db.rawQuery(" Select * from " + Contracts.Items.COL_TABLE_NAME +
-                " ORDER BY "+columnOne+" , " +columnTwo + " ASC ", null);
+                " ORDER BY " + columnOne + " , " + columnTwo + " ASC ", null);
 
         if (cursor.moveToFirst()) {
             do {
 
-                Log.d("itemList", "getAllItems: "+cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_SKU_CODE)));
+                Log.d("itemList", "getAllItems: " + cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_SKU_CODE)));
                 Items items = new Items();
                 items.setItemName(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_ITEM_NAME)));
                 items.setGroupId(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_GROUP_ID)));
@@ -192,9 +198,42 @@ public class SqliteClient extends SQLiteOpenHelper {
         return list;
     }
 
+    public Items getItemByProductId(int productId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Items items = new Items();
+        Cursor cursor = db.rawQuery("Select * from " + Contracts.Items.COL_TABLE_NAME +
+                " where " + Contracts.Items.COL_PRODUCT_ID + " =? ORDER BY "
+                + Contracts.Items.COL_PRODUCT_ID + " ASC ", new String[]{String.valueOf(productId)});
 
-    //////*********************** PRODUCT CATEGORY GROUP TABLE************/////////////////
-    /// insert items in product category table
+        if (cursor.moveToFirst()) {
+            do {
+
+                items.setItemName(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_ITEM_NAME)));
+                items.setGroupId(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_GROUP_ID)));
+                items.setBranId(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_BRAND_ID)));
+                items.setUid(cursor.getInt(cursor.getColumnIndexOrThrow(Contracts.Items.COL_ITEM_UID)));
+                items.setProductId(cursor.getInt(cursor.getColumnIndexOrThrow(Contracts.Items.COL_PRODUCT_ID)));
+                items.setBoxSize(cursor.getInt(cursor.getColumnIndexOrThrow(Contracts.Items.COL_BOX_SIZE)));
+                items.setCtnSize(cursor.getInt(cursor.getColumnIndexOrThrow(Contracts.Items.COL_CTN_SIZE)));
+                items.setImageUrl(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_IMAGE_URL)));
+                items.setSkuCode(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_SKU_CODE)));
+
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return items;
+
+    }
+
+
+    /**
+     * *********** PRODUCT CATEGORY GROUP TABLE************
+     *
+     * @param category
+     */
+
     public void insertProductCategory(ProductCategory category) {
         sqliteDb = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -261,9 +300,11 @@ public class SqliteClient extends SQLiteOpenHelper {
         return categoryList;
     }
 
-
-    //////*********************** Product Brand GROUP TABLE************/////////////////
-    ///insert data into PRODUCT BRAND table
+    /**
+     * ********** Product Brand GROUP TABLE************
+     *
+     * @param productBrand
+     */
     public void insertProductBrand(ProductBrand productBrand) {
         sqliteDb = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -275,12 +316,11 @@ public class SqliteClient extends SQLiteOpenHelper {
 
     }
 
-    /// get  productBrand by id
     public String getProductBrand(String brandId) {
         String brandName = "";
         sqliteDb = this.getReadableDatabase();
         Cursor cursor = sqliteDb.rawQuery(" select * from " + Contracts.ProductsBrand.COL_TABLE_NAME +
-                " where " + Contracts.ProductsBrand.COL_BRAND_ID +" =? ORDER BY "+
+                " where " + Contracts.ProductsBrand.COL_BRAND_ID + " =? ORDER BY " +
                 Contracts.ProductsBrand.COL_PRODUCT_ID, new String[]{String.valueOf(brandId)});
 
         if (cursor.moveToFirst()) {
@@ -300,8 +340,8 @@ public class SqliteClient extends SQLiteOpenHelper {
         List<String> productBrandList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("Select * from " + Contracts.ProductsBrand.COL_TABLE_NAME
-                +  " ORDER BY "
-                + Contracts.ProductsBrand.COL_PRODUCT_ID + " ,"+Contracts.ProductsBrand.COL_BRAND_ID+" ASC ", null);
+                + " ORDER BY "
+                + Contracts.ProductsBrand.COL_PRODUCT_ID + " ," + Contracts.ProductsBrand.COL_BRAND_ID + " ASC ", null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -316,8 +356,11 @@ public class SqliteClient extends SQLiteOpenHelper {
     }
 
 
-    //////*********************** ITEM GROUP TABLE************/////////////////
-    /// insert data into ITEM GROUP table
+    /**
+     * ***************** ITEM GROUP TABLE ***************
+     *
+     * @param itemGroup
+     */
     public void insertItemGroup(ItemGroup itemGroup) {
         sqliteDb = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -329,7 +372,6 @@ public class SqliteClient extends SQLiteOpenHelper {
         sqliteDb.insert(Contracts.ItemGroup.COL_TABLE_NAME, null, contentValues);
     }
 
-    /// get group item by id
     public String getItemGroupById(String itemGroupID) {
         String name = "Group";
         sqliteDb = this.getReadableDatabase();
@@ -354,7 +396,7 @@ public class SqliteClient extends SQLiteOpenHelper {
         List<String> itemGroupList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("Select * from " + Contracts.ItemGroup.COL_TABLE_NAME
-                +" ORDER BY "+ Contracts.ItemGroup.COL_GROUP_ID + " , "+Contracts.Items.COL_BRAND_ID+" ASC ", null);
+                + " ORDER BY " + Contracts.ItemGroup.COL_GROUP_ID + " , " + Contracts.Items.COL_BRAND_ID + " ASC ", null);
 
 
         if (cursor.moveToFirst()) {
@@ -367,6 +409,152 @@ public class SqliteClient extends SQLiteOpenHelper {
         cursor.close();
 
         return itemGroupList;
+    }
+
+
+    /**
+     * ************* Method for Sticky Header With Section **************
+     */
+
+    public List<ItemGroup> getGroupsList() {
+        List<ItemGroup> itemGroupList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("Select * from " + Contracts.ItemGroup.COL_TABLE_NAME
+                + " ORDER BY " + Contracts.ItemGroup.COL_GROUP_ID + " , " + Contracts.Items.COL_BRAND_ID + " ASC ", null);
+
+
+        if (cursor.moveToFirst()) {
+            do {
+                ItemGroup itemGroup = new ItemGroup();
+                itemGroup.setName(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.ItemGroup.COL_GROUP_NAME)));
+                itemGroup.setItemGroupId(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.ItemGroup.COL_GROUP_ID)));
+                itemGroup.setBrandId(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.ItemGroup.COL_BRAND_ID)));
+                itemGroup.setGroupCode(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.ItemGroup.COL_GROUP_CODE)));
+                itemGroupList.add(itemGroup);
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        return itemGroupList;
+    }
+
+    public List<ProductBrand> getBrandList() {
+        List<ProductBrand> productBrandList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("Select * from " + Contracts.ProductsBrand.COL_TABLE_NAME
+                + " ORDER BY "
+                + Contracts.ProductsBrand.COL_PRODUCT_ID + " ," + Contracts.ProductsBrand.COL_BRAND_ID + " ASC ", null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                ProductBrand productBrand = new ProductBrand();
+                productBrand.setProductId(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.ProductsBrand.COL_PRODUCT_ID)));
+                productBrand.setName(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.ProductsBrand.COL_BRAND_NAME)));
+                productBrand.setProductBrandId(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.ProductsBrand.COL_BRAND_ID)));
+                productBrandList.add(productBrand);
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        return productBrandList;
+    }
+
+    public List<ProductCategory> getCategoryList() {
+        List<ProductCategory> categoryList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("Select * from " + Contracts.ProductCategory.COL_TABLE_NAME, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                ProductCategory productCategory = new ProductCategory();
+                productCategory.setName(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.ProductCategory.COL_CATEGORY_NAME)));
+                productCategory.setId(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.ProductCategory.COL_CATEGORY_UID)));
+                categoryList.add(productCategory);
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        return categoryList;
+    }
+
+    public List<Product> getProductList() {
+        List<Product> productItemsList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("Select * from " + Contracts.Products.COL_TABLE_NAME, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Product items = new Product();
+                items.setProductName(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Products.COL_PRODUCT_NAME)));
+                items.setStatus(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Products.COL_STATUS)));
+                items.setUid(cursor.getInt(cursor.getColumnIndexOrThrow(Contracts.Products.COL_PRODUCT_UID)));
+                items.setCompanyId(cursor.getInt(cursor.getColumnIndexOrThrow(Contracts.Products.COL_COMPANY_ID)));
+                items.setCategoryId(cursor.getInt(cursor.getColumnIndexOrThrow(Contracts.Products.COL_CATEGORY_ID)));
+
+                productItemsList.add(items);
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        return productItemsList;
+
+    }
+
+    public List<Items> getItemsListById(String column, int searchId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        List<Items> list = new ArrayList<>();
+
+        Cursor cursor = db.rawQuery("Select * from " + Contracts.Items.COL_TABLE_NAME +
+                " where " + column + " =? ORDER BY "
+                + column + " ASC ", new String[]{String.valueOf(searchId)});
+
+        if (cursor.moveToFirst()) {
+            do {
+                Items items = new Items();
+                items.setItemName(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_ITEM_NAME)));
+                items.setGroupId(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_GROUP_ID)));
+                items.setBranId(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_BRAND_ID)));
+                items.setUid(cursor.getInt(cursor.getColumnIndexOrThrow(Contracts.Items.COL_ITEM_UID)));
+                items.setProductId(cursor.getInt(cursor.getColumnIndexOrThrow(Contracts.Items.COL_PRODUCT_ID)));
+                items.setBoxSize(cursor.getInt(cursor.getColumnIndexOrThrow(Contracts.Items.COL_BOX_SIZE)));
+                items.setCtnSize(cursor.getInt(cursor.getColumnIndexOrThrow(Contracts.Items.COL_CTN_SIZE)));
+                items.setImageUrl(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_IMAGE_URL)));
+                items.setSkuCode(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_SKU_CODE)));
+                list.add(items);
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return list;
+
+    }
+
+    public List<String> getProductIdByCategoryId(String categoryId) {
+        List<String> productId = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("select * from " + Contracts.Products.COL_TABLE_NAME +
+                " where " + Contracts.Products.COL_CATEGORY_ID + " =? ORDER BY "
+                + Contracts.Products.COL_CATEGORY_ID + " ASC ", new String[]{String.valueOf(categoryId)});
+
+
+        if (cursor.moveToFirst()) {
+            do {
+                productId.add(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Products.COL_PRODUCT_UID)));
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return productId;
     }
 
 
