@@ -10,8 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -55,7 +58,7 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
 
     @Override
     public int getChildCount(int groupPosition) {
-        return productList.get(groupPosition).itemsList.size();
+        return productList.get(groupPosition).getItemsList().size();
     }
 
     @Override
@@ -68,50 +71,55 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
 
         Items items = productList.get(groupPosition).getItemsList().get(chilPosition);
 
-        if (itemDataMap.containsKey(items.getUid())) {
-            ((ChildViewHolder) viewHolder).edBox.setText("" + itemDataMap.get(items.getUid()));
+        if(list.isEmpty()) {
+            /// set item values
+            ((ChildViewHolder) viewHolder).availableStock.setText("Stock Available : " + items.getBoxSize());
+            ((ChildViewHolder) viewHolder).itemName.setText(items.getItemName());
+            ((ChildViewHolder) viewHolder).itemSqCode.setText("SKU Code : " + items.getSkuCode());
+
+            Glide.with(context)
+                    .load(items.getImageUrl())
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
+                    .centerCrop()
+                    .into(((ChildViewHolder) viewHolder).itemImage);
+
+
+//        if (itemDataMap.containsKey(items.getUid())) {
+//            ((ChildViewHolder) viewHolder).edBox.setText("" + itemDataMap.get(items.getUid()));
+//        }
+//
+//        /// text change listener on edBox
+//        ((ChildViewHolder) viewHolder).edBox.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                if (!s.toString().isEmpty()) {
+//                    // edBox.setId(items.getUid());
+//                    int number = Integer.parseInt(s.toString().trim());
+//                    itemDataMap.put(items.getUid(), number);
+//                }
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//            }
+//        });
         }
 
-        Log.d("tagUzair", "onBindChildViewHolder: " + items.getUid() + " : " + chilPosition);
-        /// text change listener on edBox
-        ((ChildViewHolder) viewHolder).edBox.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+    }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (!s.toString().isEmpty()) {
-                    // edBox.setId(items.getUid());
-                    int number = Integer.parseInt(s.toString().trim());
-                    itemDataMap.put(items.getUid(), number);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-
-        /// set item values
-        ((ChildViewHolder) viewHolder).availableStock.setText("Stock Available : " + items.getBoxSize());
-        ((ChildViewHolder) viewHolder).itemName.setText(items.getItemName());
-        ((ChildViewHolder) viewHolder).itemSqCode.setText("SKU Code : " + items.getSkuCode());
-
-        Glide.with(context)
-                .load(items.getImageUrl())
-                .diskCacheStrategy(DiskCacheStrategy.DATA)
-                .centerCrop()
-                .into(((ChildViewHolder) viewHolder).itemImage);
-
-//        imageLoader.displayImage(items.getImageUrl(), ((ChildViewHolder) viewHolder).itemImage);
-
-
+    @Override
+    public boolean isGroup(int viewType) {
+        return viewType > 0;
     }
 
     @Override
     protected void onBindGroupViewHolder(ViewHolder viewHolder, int groupPosition, boolean expand, List<?> list) {
         ProductItem product = productList.get(groupPosition);
+        if(list.isEmpty())
         ((HeaderViewHolder) viewHolder).headerTitle.setText(product.getProductName() + "  (" + getChildCount(groupPosition) + " Skus)");
     }
 
@@ -132,6 +140,7 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
     protected void onGroupExpandChange(int groupPosition, boolean expand) {
         if (expand) {
             pos++;
+         //   DropDownList.scrollToPosition(groupPosition);
             DropDownList.setProductPosition(pos);
             Log.d("TAG", "onGroupExpandChange: open " + DropDownList.getProductPosition());
         } else {
@@ -141,6 +150,12 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
                 Log.d("TAG", "onGroupExpandChange: close " + DropDownList.getProductPosition());
             }
         }
+    }
+
+
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 
     @Override
@@ -156,11 +171,6 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
     }
 
     @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
     public Filter getFilter() {
         return searchFilter;
     }
@@ -169,34 +179,31 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             String charString = constraint.toString();
-            List<ProductItem> filteredList = new ArrayList<>();
             if (charString.isEmpty() || charString == null) {
                 productList = mFilteredListCopy;
             } else {
 
+                List<ProductItem> filteredList = new ArrayList<>();
                 for (int i = 0; i < mFilteredListCopy.size(); i++) {
-                    List<Items> itemsList = new ArrayList<>();
-                    ProductItem productItem = null;
-                    for (Items item : mFilteredListCopy.get(i).getItemsList()) {
-                        List<Items> list = new ArrayList<>();
-                        if (item.getItemName().toLowerCase().contains(charString.toLowerCase()) ||
-                                item.getSkuCode().toLowerCase().contains(charString.toLowerCase())) {
-
+                    for (Items row : mFilteredListCopy.get(i).getItemsList()) {
+                        if (row.getSkuCode().toLowerCase().contains(charString.toLowerCase()) ||
+                                row.getItemName().toLowerCase().contains(charString.toLowerCase()))
+                        {
+                            List<Items> list = new ArrayList<>();
                             // set product data
-                            productItem = new ProductItem();
+                            ProductItem productItem = new ProductItem();
                             productItem.setProductName(mFilteredListCopy.get(i).getProductName());
                             productItem.setStatus(mFilteredListCopy.get(i).getStatus());
                             productItem.setUid(mFilteredListCopy.get(i).getUid());
                             productItem.setCategoryId(mFilteredListCopy.get(i).getCategoryId());
                             productItem.setCompanyId(mFilteredListCopy.get(i).getCompanyId());
-
-                            // add item to list
-                            list.add(item);
-                            itemsList.addAll(list);
-                            // set list item in product
-                            productItem.setItemsList(itemsList);
+                            // add row to list
+                            list.add(row);
+                            // set list row in product
+                            productItem.setItemsList(list);
                             // add to filtered list
                             filteredList.add(productItem);
+                            Log.d("tagUzairSearch", "performFiltering: "+row.getSkuCode());
                         }
 
                     }
@@ -220,5 +227,6 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
             expandAllGroup();
         }
     };
+
 
 }

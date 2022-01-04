@@ -10,13 +10,12 @@ import com.uzair.dropdownsectionrecyclerview.R;
 import pokercc.android.expandablerecyclerview.ExpandableAdapter;
 
 public class ChildViewHolder extends ExpandableAdapter.ViewHolder {
-    public static TextView itemName, itemSqCode, availableStock, totalPcs;
-    public static ImageView itemImage;
-    public static EditText edCtn, edPcs, edBox;
+    public TextView itemName, itemSqCode, availableStock, totalPcs;
+    public ImageView itemImage;
+    public EditText edCtn, edPcs, edBox;
 
     public ChildViewHolder(View itemView) {
         super(itemView);
-
         totalPcs = itemView.findViewById(R.id.totalPcs);
         availableStock = itemView.findViewById(R.id.availableStock);
         itemName = itemView.findViewById(R.id.itemName);

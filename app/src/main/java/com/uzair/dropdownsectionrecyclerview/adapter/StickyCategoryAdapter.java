@@ -49,7 +49,7 @@ public class StickyCategoryAdapter extends ExpandableAdapter<ExpandableAdapter.V
 
     @Override
     public int getChildCount(int groupPosition) {
-        return productCategoryList.get(groupPosition).itemsList.size();
+        return productCategoryList.get(groupPosition).getItemsList().size();
     }
 
     @Override

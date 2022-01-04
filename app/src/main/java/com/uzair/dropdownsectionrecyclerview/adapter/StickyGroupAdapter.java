@@ -11,6 +11,8 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Filter;
 import android.widget.Filterable;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.uzair.dropdownsectionrecyclerview.R;
@@ -31,12 +33,14 @@ public class StickyGroupAdapter extends ExpandableAdapter<ExpandableAdapter.View
     ImageLoader imageLoader;
     List<ItemGroup> itemGroupList;
     List<ItemGroup> mFilteredListCopy;
+    Context context;
     LinkedHashMap<Integer, Integer> itemDataMap = new LinkedHashMap<>();
     private int pos;
 
     public StickyGroupAdapter(List<ItemGroup> itemGroupList, Context context) {
         this.itemGroupList = itemGroupList;
         this.mFilteredListCopy = itemGroupList;
+        this.context = context;
         imageLoader = ImageLoader.getInstance();
         imageLoader.init(ImageLoaderConfiguration.createDefault(context));
     }
@@ -84,7 +88,12 @@ public class StickyGroupAdapter extends ExpandableAdapter<ExpandableAdapter.View
         ((ChildViewHolder) viewHolder).availableStock.setText("Stock Available : " + items.getBoxSize());
         ((ChildViewHolder) viewHolder).itemName.setText(items.getItemName());
         ((ChildViewHolder) viewHolder).itemSqCode.setText("SKU Code : " + items.getSkuCode());
-        imageLoader.displayImage(items.getImageUrl(), ((ChildViewHolder) viewHolder).itemImage);
+        Glide.with(context)
+                .load(items.getImageUrl())
+                .diskCacheStrategy(DiskCacheStrategy.DATA)
+                .centerCrop()
+                .into(((ChildViewHolder) viewHolder).itemImage);
+//        imageLoader.displayImage(items.getImageUrl(), ((ChildViewHolder) viewHolder).itemImage);
 
     }
 

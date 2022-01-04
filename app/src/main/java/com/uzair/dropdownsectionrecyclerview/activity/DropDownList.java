@@ -55,7 +55,7 @@ public class DropDownList extends AppCompatActivity {
     List<ItemGroup> itemGroupsList, pItemGroupCompleteList;
     List<ProductCategory> categoryList, pCategoryCompleteList;
     //adapters
-    StickyProductAdapter productAdapter;
+    static StickyProductAdapter productAdapter;
     StickyBrandAdapter brandAdapter;
     StickyGroupAdapter groupAdapter;
     StickyCategoryAdapter categoryAdapter;
@@ -316,7 +316,6 @@ public class DropDownList extends AppCompatActivity {
 
         // recycler view
         recyclerView = findViewById(R.id.recyclerViewStickyHeader);
-        recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
@@ -382,10 +381,8 @@ public class DropDownList extends AppCompatActivity {
     }
 
     private void setUpProductAdapter() {
-
         productAdapter = new StickyProductAdapter(productCompleteList, DropDownList.this);
         productAdapter.collapseAllGroup();
-        recyclerView.setItemViewCacheSize(itemList.size());
         recyclerView.setAdapter(productAdapter);
         SharedPref.storeType("Product");
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -629,5 +626,11 @@ public class DropDownList extends AppCompatActivity {
         }
 
 
+    }
+
+    public static void scrollToPosition(int groPosition)
+    {
+        productAdapter.collapseAllGroup();
+        productAdapter.expandGroup(groPosition, true);
     }
 }

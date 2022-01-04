@@ -11,6 +11,8 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Filter;
 import android.widget.Filterable;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.uzair.dropdownsectionrecyclerview.R;
@@ -29,7 +31,7 @@ import pokercc.android.expandablerecyclerview.ExpandableAdapter;
 public class StickyBrandAdapter extends ExpandableAdapter<ExpandableAdapter.ViewHolder>
 implements Filterable
 {
-
+    private Context context;
     private List<ProductBrand> brandList;
     private ImageLoader imageLoader;
     private List<ProductBrand> mFilteredListCopy;
@@ -39,6 +41,7 @@ implements Filterable
     public StickyBrandAdapter(List<ProductBrand> brandList, Context context) {
         this.brandList = brandList;
         this.mFilteredListCopy = brandList;
+        this.context = context;
         imageLoader = ImageLoader.getInstance();
         imageLoader.init(ImageLoaderConfiguration.createDefault(context));
     }
@@ -88,10 +91,13 @@ implements Filterable
         ((ChildViewHolder) viewHolder).availableStock.setText("Stock Available : " + items.getBoxSize());
         ((ChildViewHolder) viewHolder).itemName.setText(items.getItemName());
         ((ChildViewHolder) viewHolder).itemSqCode.setText("SKU Code : " + items.getSkuCode());
-        imageLoader.displayImage(items.getImageUrl(), ((ChildViewHolder) viewHolder).itemImage);
+      //  imageLoader.displayImage(items.getImageUrl(), ((ChildViewHolder) viewHolder).itemImage);
 
-        // click on item
-        //    ((ChildViewHolder) viewHolder).itemView.setOnClickListener(v -> onItemClickListener.onItemClicked(items));
+        Glide.with(context)
+                .load(items.getImageUrl())
+                .diskCacheStrategy(DiskCacheStrategy.DATA)
+                .centerCrop()
+                .into(((ChildViewHolder) viewHolder).itemImage);
 
 
     }
