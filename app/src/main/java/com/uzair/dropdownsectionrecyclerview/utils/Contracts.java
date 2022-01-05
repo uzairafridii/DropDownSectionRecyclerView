@@ -33,6 +33,10 @@ public class Contracts {
         public static final String COL_IMAGE_URL = "image_url";
         public static final String COL_BOX_SIZE = "box_size";
         public static final String COL_CTN_SIZE = "ctn_size";
+        public static final String COL_FREQUENT = "frequent";
+        public static final String COL_MUST_SELL = "must_sell";
+        public static final String COL_ABOVE_TARGET = "above_target";
+        public static final String COL_BELOW_TARGET = "below_target";
     }
 
 

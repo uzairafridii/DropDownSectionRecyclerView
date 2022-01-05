@@ -1,7 +1,9 @@
 package com.uzair.dropdownsectionrecyclerview.adapter;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -41,19 +43,15 @@ import pokercc.android.expandablerecyclerview.ExpandableAdapter;
 public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.ViewHolder>
         implements Filterable {
 
-    ImageLoader imageLoader;
     List<ProductItem> mFilteredListCopy;
     private List<ProductItem> productList;
     LinkedHashMap<Integer, Integer> itemDataMap = new LinkedHashMap<>();
     Context context;
-    private int pos = 0;
 
     public StickyProductAdapter(List<ProductItem> productList, Context context) {
         this.productList = productList;
         this.mFilteredListCopy = productList;
         this.context = context;
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(ImageLoaderConfiguration.createDefault(context));
     }
 
     @Override
@@ -71,56 +69,49 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
 
         Items items = productList.get(groupPosition).getItemsList().get(chilPosition);
 
-        if(list.isEmpty()) {
-            /// set item values
-            ((ChildViewHolder) viewHolder).availableStock.setText("Stock Available : " + items.getBoxSize());
-            ((ChildViewHolder) viewHolder).itemName.setText(items.getItemName());
-            ((ChildViewHolder) viewHolder).itemSqCode.setText("SKU Code : " + items.getSkuCode());
+        /// set item values
+        ((ChildViewHolder) viewHolder).availableStock.setText("Stock Available : " + items.getBoxSize());
+        ((ChildViewHolder) viewHolder).itemName.setText(items.getItemName());
+        ((ChildViewHolder) viewHolder).itemSqCode.setText("SKU Code : " + items.getSkuCode());
 
-            Glide.with(context)
-                    .load(items.getImageUrl())
-                    .diskCacheStrategy(DiskCacheStrategy.DATA)
-                    .centerCrop()
-                    .into(((ChildViewHolder) viewHolder).itemImage);
+        Glide.with(context)
+                .load(items.getImageUrl())
+                .diskCacheStrategy(DiskCacheStrategy.DATA)
+                .centerCrop()
+                .into(((ChildViewHolder) viewHolder).itemImage);
 
 
-//        if (itemDataMap.containsKey(items.getUid())) {
-//            ((ChildViewHolder) viewHolder).edBox.setText("" + itemDataMap.get(items.getUid()));
-//        }
-//
-//        /// text change listener on edBox
-//        ((ChildViewHolder) viewHolder).edBox.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                if (!s.toString().isEmpty()) {
-//                    // edBox.setId(items.getUid());
-//                    int number = Integer.parseInt(s.toString().trim());
-//                    itemDataMap.put(items.getUid(), number);
-//                }
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//            }
-//        });
+        if (itemDataMap.containsKey(items.getUid())) {
+            ((ChildViewHolder) viewHolder).edBox.setText("" + itemDataMap.get(items.getUid()));
         }
 
-    }
+        /// text change listener on edBox
+        ((ChildViewHolder) viewHolder).edBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
-    @Override
-    public boolean isGroup(int viewType) {
-        return viewType > 0;
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!s.toString().isEmpty()) {
+                    // edBox.setId(items.getUid());
+                    int number = Integer.parseInt(s.toString().trim());
+                    itemDataMap.put(items.getUid(), number);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+
     }
 
     @Override
     protected void onBindGroupViewHolder(ViewHolder viewHolder, int groupPosition, boolean expand, List<?> list) {
         ProductItem product = productList.get(groupPosition);
-        if(list.isEmpty())
-        ((HeaderViewHolder) viewHolder).headerTitle.setText(product.getProductName() + "  (" + getChildCount(groupPosition) + " Skus)");
+        ((HeaderViewHolder) viewHolder).headerTitle.setText(groupPosition + 1 + ". " + product.getProductName() + "  (" + getChildCount(groupPosition) + " Skus)");
     }
 
     @Override
@@ -137,32 +128,18 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
 
 
     @Override
-    protected void onGroupExpandChange(int groupPosition, boolean expand) {
-        if (expand) {
-            pos++;
-         //   DropDownList.scrollToPosition(groupPosition);
-            DropDownList.setProductPosition(pos);
-            Log.d("TAG", "onGroupExpandChange: open " + DropDownList.getProductPosition());
-        } else {
-            if (pos > 0) {
-                pos--;
-                DropDownList.setProductPosition(pos);
-                Log.d("TAG", "onGroupExpandChange: close " + DropDownList.getProductPosition());
-            }
-        }
-    }
-
-
-    @Override
     public long getItemId(int position) {
         return position;
     }
+
 
     @Override
     protected void onGroupViewHolderExpandChange(ViewHolder viewHolder, int i, long animDuration, boolean expand) {
         View arrowImage = ((HeaderViewHolder) viewHolder).mArrow;
         float deg;
         if (expand) {
+            // rotate icon and change background of selected header
+          //  ((HeaderViewHolder) viewHolder).headerTitle.setBackgroundColor(Color.MAGENTA);
             deg = arrowImage.getRotation() + 180F;
         } else {
             deg = (arrowImage.getRotation() == 180F) ? 0F : 180F;
@@ -187,8 +164,7 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
                 for (int i = 0; i < mFilteredListCopy.size(); i++) {
                     for (Items row : mFilteredListCopy.get(i).getItemsList()) {
                         if (row.getSkuCode().toLowerCase().contains(charString.toLowerCase()) ||
-                                row.getItemName().toLowerCase().contains(charString.toLowerCase()))
-                        {
+                                row.getItemName().toLowerCase().contains(charString.toLowerCase())) {
                             List<Items> list = new ArrayList<>();
                             // set product data
                             ProductItem productItem = new ProductItem();
@@ -203,7 +179,7 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
                             productItem.setItemsList(list);
                             // add to filtered list
                             filteredList.add(productItem);
-                            Log.d("tagUzairSearch", "performFiltering: "+row.getSkuCode());
+                            Log.d("tagUzairSearch", "performFiltering: " + row.getSkuCode());
                         }
 
                     }
@@ -224,7 +200,8 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
         protected void publishResults(CharSequence constraint, FilterResults filterResults) {
             productList = (ArrayList<ProductItem>) filterResults.values;
             notifyDataSetChanged();
-            expandAllGroup();
+            collapseAllGroup();
+            DropDownList.setProductPosition(0);
         }
     };
 

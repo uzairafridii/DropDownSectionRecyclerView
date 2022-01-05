@@ -35,16 +35,11 @@ public class StickyCategoryAdapter extends ExpandableAdapter<ExpandableAdapter.V
     private List<ProductCategory> mFilteredListCopy;
     private Context context;
     LinkedHashMap<Integer, Integer> itemDataMap = new LinkedHashMap<>();
-    ImageLoader imageLoader;
-    private int pos;
 
     public StickyCategoryAdapter(List<ProductCategory> productCategoryList , Context context) {
         this.productCategoryList = productCategoryList;
         this.mFilteredListCopy = productCategoryList;
         this.context = context;
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(ImageLoaderConfiguration.createDefault(context));
-
     }
 
     @Override
@@ -91,7 +86,6 @@ public class StickyCategoryAdapter extends ExpandableAdapter<ExpandableAdapter.V
         ((ChildViewHolder) viewHolder).availableStock.setText("Stock Available : " + items.getBoxSize());
         ((ChildViewHolder) viewHolder).itemName.setText(items.getItemName());
         ((ChildViewHolder) viewHolder).itemSqCode.setText("SKU Code : " + items.getSkuCode());
-       // imageLoader.displayImage(items.getImageUrl(), ((ChildViewHolder) viewHolder).itemImage);
         Glide.with(context)
                 .load(items.getImageUrl())
                 .diskCacheStrategy(DiskCacheStrategy.DATA)
@@ -103,7 +97,8 @@ public class StickyCategoryAdapter extends ExpandableAdapter<ExpandableAdapter.V
     @Override
     protected void onBindGroupViewHolder(ViewHolder viewHolder, int groupPosition, boolean b, List<?> list) {
         ProductCategory product = productCategoryList.get(groupPosition);
-        ((HeaderViewHolder) viewHolder).headerTitle.setText(product.getName() + "  (" + getChildCount(groupPosition) + " Skus)");
+        ((HeaderViewHolder) viewHolder).headerTitle.setText(groupPosition + 1 +". "+
+                product.getName() + "  (" + getChildCount(groupPosition) + " Skus)");
     }
 
     @Override
@@ -118,20 +113,7 @@ public class StickyCategoryAdapter extends ExpandableAdapter<ExpandableAdapter.V
         return new HeaderViewHolder(mView);
     }
 
-    @Override
-    protected void onGroupExpandChange(int groupPosition, boolean expand) {
-        if (expand) {
-            pos++;
-            DropDownList.setCategoryPosition(pos);
-            Log.d("TAG", "onGroupExpandChange: open " + DropDownList.getProductPosition());
-        } else {
-            if(pos > 0) {
-                pos--;
-                DropDownList.setCategoryPosition(pos);
-                Log.d("TAG", "onGroupExpandChange: close " + DropDownList.getProductPosition());
-            }
-        }
-    }
+
 
     @Override
     protected void onGroupViewHolderExpandChange(ViewHolder viewHolder, int i, long l, boolean expand) {
@@ -139,12 +121,9 @@ public class StickyCategoryAdapter extends ExpandableAdapter<ExpandableAdapter.V
         float deg;
 
         if (expand) {
-
             deg = arrowImage.getRotation() + 180F;
         } else {
-
             deg = (arrowImage.getRotation() == 180F) ? 0F : 180F;
-
         }
         arrowImage.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
     }
@@ -199,7 +178,8 @@ public class StickyCategoryAdapter extends ExpandableAdapter<ExpandableAdapter.V
         protected void publishResults(CharSequence constraint, FilterResults results) {
             productCategoryList = (ArrayList<ProductCategory>) results.values;
             notifyDataSetChanged();
-            expandAllGroup();
+            collapseAllGroup();
+            DropDownList.setCategoryPosition(0);
         }
     };
 }

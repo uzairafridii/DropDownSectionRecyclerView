@@ -33,17 +33,13 @@ implements Filterable
 {
     private Context context;
     private List<ProductBrand> brandList;
-    private ImageLoader imageLoader;
     private List<ProductBrand> mFilteredListCopy;
     private LinkedHashMap<Integer, Integer> itemDataMap = new LinkedHashMap<>();
-    private int pos;
 
     public StickyBrandAdapter(List<ProductBrand> brandList, Context context) {
         this.brandList = brandList;
         this.mFilteredListCopy = brandList;
         this.context = context;
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(ImageLoaderConfiguration.createDefault(context));
     }
 
     @Override
@@ -91,7 +87,6 @@ implements Filterable
         ((ChildViewHolder) viewHolder).availableStock.setText("Stock Available : " + items.getBoxSize());
         ((ChildViewHolder) viewHolder).itemName.setText(items.getItemName());
         ((ChildViewHolder) viewHolder).itemSqCode.setText("SKU Code : " + items.getSkuCode());
-      //  imageLoader.displayImage(items.getImageUrl(), ((ChildViewHolder) viewHolder).itemImage);
 
         Glide.with(context)
                 .load(items.getImageUrl())
@@ -105,7 +100,8 @@ implements Filterable
     @Override
     protected void onBindGroupViewHolder(ViewHolder viewHolder, int groupPosition, boolean expand, List<?> list) {
         ProductBrand product = brandList.get(groupPosition);
-        ((HeaderViewHolder) viewHolder).headerTitle.setText(product.getName() + "  (" + getChildCount(groupPosition) + " Skus)");
+        ((HeaderViewHolder) viewHolder).headerTitle.setText(groupPosition + 1 +". "+product.getName() +
+                "  (" + getChildCount(groupPosition) + " Skus)");
     }
 
     @Override
@@ -120,21 +116,6 @@ implements Filterable
         return new HeaderViewHolder(mView);
     }
 
-
-    @Override
-    protected void onGroupExpandChange(int groupPosition, boolean expand) {
-        if (expand) {
-            pos++;
-            DropDownList.setBrandPosition(pos);
-            Log.d("TAG", "onGroupExpandChange: open " + DropDownList.getProductPosition());
-        } else {
-            if(pos > 0) {
-                pos--;
-                DropDownList.setBrandPosition(pos);
-                Log.d("TAG", "onGroupExpandChange: close " + DropDownList.getProductPosition());
-            }
-        }
-    }
 
     @Override
     protected void onGroupViewHolderExpandChange(ViewHolder viewHolder, int i, long animDuration, boolean expand) {
@@ -205,7 +186,8 @@ implements Filterable
         protected void publishResults(CharSequence constraint, FilterResults filterResults) {
             brandList = (ArrayList<ProductBrand>) filterResults.values;
             notifyDataSetChanged();
-            expandAllGroup();
+            collapseAllGroup();
+            DropDownList.setBrandPosition(0);
         }
     };
 

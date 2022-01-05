@@ -6,6 +6,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -20,11 +21,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.uzair.dropdownsectionrecyclerview.R;
+import com.uzair.dropdownsectionrecyclerview.adapter.StickyFrequentAdapter;
 import com.uzair.dropdownsectionrecyclerview.adapter.StickyProductAdapter;
 import com.uzair.dropdownsectionrecyclerview.adapter.StickyBrandAdapter;
 import com.uzair.dropdownsectionrecyclerview.adapter.StickyCategoryAdapter;
 import com.uzair.dropdownsectionrecyclerview.adapter.StickyGroupAdapter;
 import com.uzair.dropdownsectionrecyclerview.database.SqliteClient;
+import com.uzair.dropdownsectionrecyclerview.model.Common;
 import com.uzair.dropdownsectionrecyclerview.model.ItemGroup;
 import com.uzair.dropdownsectionrecyclerview.model.Items;
 import com.uzair.dropdownsectionrecyclerview.model.Product;
@@ -42,28 +45,32 @@ import pokercc.android.expandablerecyclerview.ExpandableRecyclerView;
 public class DropDownList extends AppCompatActivity {
 
     //views
-    ExpandableRecyclerView recyclerView;
+    static ExpandableRecyclerView recyclerView;
+    static LinearLayoutManager layoutManager;
     SearchView searchView;
     //db
     DatabaseReference dbRef;
     SqliteClient client;
     //list
     List<Items> itemList;
+    List<Common> frequentList, mustSellList, aboveTargetList, belowTargetList;
     List<ProductItem> productCompleteList;
     List<Product> product;
     List<ProductBrand> productBrandList, pBrandCompleteList;
     List<ItemGroup> itemGroupsList, pItemGroupCompleteList;
     List<ProductCategory> categoryList, pCategoryCompleteList;
     //adapters
+    StickyFrequentAdapter frequentAdapter;
     static StickyProductAdapter productAdapter;
     StickyBrandAdapter brandAdapter;
     StickyGroupAdapter groupAdapter;
     StickyCategoryAdapter categoryAdapter;
-    public static int productPosition = 0, brandPosition, groupPosition, categoryPosition;
+    public static int productPosition, brandPosition, groupPosition, categoryPosition;
     //bottom sheet
     LinearLayout bottomSheetLayout;
     BottomSheetBehavior bottomSheetBehavior;
     TextView title;
+    static Button btnDown;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +81,7 @@ public class DropDownList extends AppCompatActivity {
         setBottomSheetLayout();
         loadAdapter();
 
-        // click on more icon to open bottom sheet
+        // click on more icon to open/close bottom sheet
         findViewById(R.id.moreIcon)
                 .setOnClickListener(v -> {
                     if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
@@ -85,7 +92,7 @@ public class DropDownList extends AppCompatActivity {
                 });
 
 
-        /// search view
+        // search view
         setUpSearch();
 
     }
@@ -113,28 +120,17 @@ public class DropDownList extends AppCompatActivity {
                 setUpGroupAdapter();
                 break;
             }
+            case "Frequent": {
+                setHeaderTitle("Frequent");
+                setUpFrequentAdapter(frequentList, "Frequent");
+                break;
+            }
         }
     }
 
     ///// ******** POSITION SETTER AND GETTER ********** //////
     public static void setBrandPosition(int bPosition) {
         brandPosition = bPosition;
-    }
-
-    public static int getProductPosition() {
-        return productPosition;
-    }
-
-    public static int getCategoryPosition() {
-        return categoryPosition;
-    }
-
-    public static int getBrandPosition() {
-        return brandPosition;
-    }
-
-    public static int getGroupPosition() {
-        return groupPosition;
     }
 
     public static void setProductPosition(int pPosition) {
@@ -186,6 +182,12 @@ public class DropDownList extends AppCompatActivity {
                     }
 
 
+                    case "Frequent": {
+                        frequentAdapter.getFilter().filter(searchQuery);
+                        break;
+                    }
+
+
                 }
                 return false;
             }
@@ -214,6 +216,14 @@ public class DropDownList extends AppCompatActivity {
                         break;
                     }
 
+                    case "Frequent":
+                    case "Below Target":
+                    case "Must Sell":
+                    case "Above Target": {
+                        frequentAdapter.getFilter().filter(searchText);
+                        break;
+                    }
+
 
                 }
                 return false;
@@ -223,6 +233,7 @@ public class DropDownList extends AppCompatActivity {
     }
 
     private void initViews() {
+        btnDown = findViewById(R.id.btnDown);
         /// pref
         SharedPref.init(this);
         // views ,db and get all data
@@ -236,6 +247,11 @@ public class DropDownList extends AppCompatActivity {
         getAllCategory();
 
         // init list
+        frequentList = new ArrayList<>();
+        mustSellList = new ArrayList<>();
+        belowTargetList = new ArrayList<>();
+        aboveTargetList = new ArrayList<>();
+
         productCompleteList = new ArrayList<>();
         pBrandCompleteList = new ArrayList<>();
         pItemGroupCompleteList = new ArrayList<>();
@@ -246,6 +262,20 @@ public class DropDownList extends AppCompatActivity {
         productBrandList = client.getBrandList();
         itemGroupsList = client.getGroupsList();
         categoryList = client.getCategoryList();
+
+
+        // add items to above target list
+        List<Items> aboveTargetItemList = client.getItemsListById(Contracts.Items.COL_ABOVE_TARGET, 102);
+        aboveTargetList.add(new Common("Above Target", aboveTargetItemList));
+        // add items to below target list
+        List<Items> belowTargetItemsList = client.getItemsListById(Contracts.Items.COL_BELOW_TARGET, 103);
+        belowTargetList.add(new Common("Below Target", belowTargetItemsList));
+        // add items to must sell list
+        List<Items> mustSellItemsList = client.getItemsListById(Contracts.Items.COL_MUST_SELL, 101);
+        mustSellList.add(new Common("Must Sell", mustSellItemsList));
+        // add items to frequent list using frequent id
+        List<Items> freqItemList = client.getItemsListById(Contracts.Items.COL_FREQUENT, 100);
+        frequentList.add(new Common("Frequent", freqItemList));
 
         // add items to product list according to product id
         for (int i = 0; i < product.size(); i++) {
@@ -316,23 +346,27 @@ public class DropDownList extends AppCompatActivity {
 
         // recycler view
         recyclerView = findViewById(R.id.recyclerViewStickyHeader);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
 
 
     }
 
     //// *********** BOTTOM SHEET SETUP ************** /////
-    private void setBottomSheetLayout()
-    {
+    private void setBottomSheetLayout() {
         bottomSheetLayout = findViewById(R.id.bottomSheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
-        Button product, category, brand, group;
+        Button product, category, brand, group, frequent, mustSell, aboveTarget, belowTarget;
         product = findViewById(R.id.btnProduct);
         category = findViewById(R.id.btnCategory);
         brand = findViewById(R.id.btnBrand);
         group = findViewById(R.id.btnGroup);
+        frequent = findViewById(R.id.btnFrequent);
+        mustSell = findViewById(R.id.btnMustSell);
+        aboveTarget = findViewById(R.id.btnAboveTarget);
+        belowTarget = findViewById(R.id.btnBelowTarget);
 
         product.setOnClickListener(v -> {
             setHeaderTitle("Product");
@@ -352,6 +386,26 @@ public class DropDownList extends AppCompatActivity {
         group.setOnClickListener(v -> {
             setHeaderTitle("Group");
             setUpGroupAdapter();
+        });
+
+        frequent.setOnClickListener(v -> {
+            setHeaderTitle("Frequent");
+            setUpFrequentAdapter(frequentList, "Frequent");
+        });
+
+        mustSell.setOnClickListener(v -> {
+            setHeaderTitle("Must Sell");
+            setUpFrequentAdapter(mustSellList, "Must Sell");
+        });
+
+        aboveTarget.setOnClickListener(v -> {
+            setHeaderTitle("Above Target");
+            setUpFrequentAdapter(aboveTargetList, "Above Target");
+        });
+
+        belowTarget.setOnClickListener(v -> {
+            setHeaderTitle("Below Target");
+            setUpFrequentAdapter(belowTargetList, "Below Target");
         });
 
 
@@ -395,6 +449,15 @@ public class DropDownList extends AppCompatActivity {
         SharedPref.storeType("Brand");
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
+
+    private void setUpFrequentAdapter(List<Common> commonList, String storeType) {
+        frequentAdapter = new StickyFrequentAdapter(commonList, this);
+        frequentAdapter.collapseAllGroup();
+        recyclerView.setAdapter(frequentAdapter);
+        SharedPref.storeType(storeType);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
+
 
     /// *************  GET PRODUCTS , ITEMS, CATEGORY , GROUP , BRAND DATA FROM FIREBASE *********** /////////
     private void getAllProducts() {
@@ -445,6 +508,19 @@ public class DropDownList extends AppCompatActivity {
                             items.setCtnSize(Integer.parseInt(String.valueOf(query.child("ctn_size").getValue())));
                             items.setBoxSize(Integer.parseInt(String.valueOf(query.child("box_size").getValue())));
                             items.setUid(Integer.parseInt(String.valueOf(query.child("uid").getValue())));
+                            String frequent = String.valueOf(query.child("frequent").getValue());
+                            if (frequent != null && !frequent.isEmpty()) {
+                                items.setFrequent(frequent);
+                            }
+                            if (String.valueOf(query.child("must_sell").getValue()) != null) {
+                                items.setMust_sell(String.valueOf(query.child("must_sell").getValue()));
+                            }
+                            if (String.valueOf(query.child("above_target").getValue()) != null) {
+                                items.setAbove_target((String.valueOf(query.child("above_target").getValue())));
+                            }
+                            if (String.valueOf(query.child("below_target").getValue()) != null) {
+                                items.setBelow_target(String.valueOf(query.child("below_target").getValue()));
+                            }
 
                             client.insertItems(items);
                         }
@@ -536,41 +612,64 @@ public class DropDownList extends AppCompatActivity {
         switch (SharedPref.getType()) {
             case "Product": {
                 if (productPosition < productAdapter.getGroupCount()) {
-                    productAdapter.expandGroup(getProductPosition(), true);
-                    setProductPosition(productPosition++);
-                    Log.d("down", "onGroupExpandChange: " + getProductPosition());
+                    productAdapter.collapseAllGroup();
+                    new Handler()
+                            .postDelayed(() -> {
+                                layoutManager.scrollToPositionWithOffset(productPosition, 0);
+                                productAdapter.expandGroup(productPosition, true);
+                                productPosition++;
+                            }, 1);
 
                 } else {
-                    Toast.makeText(DropDownList.this, "All sections are expanded", Toast.LENGTH_SHORT).show();
+                    productPosition = 0;
+                    productAdapter.collapseAllGroup();
                 }
                 break;
             }
             case "Brand": {
                 if (brandPosition < brandAdapter.getGroupCount()) {
-                    brandAdapter.expandGroup(getBrandPosition(), true);
-                    setBrandPosition(brandPosition++);
+                    brandAdapter.collapseAllGroup();
+                    new Handler()
+                            .postDelayed(() -> {
+                                layoutManager.scrollToPositionWithOffset(brandPosition, 0);
+                                brandAdapter.expandGroup(brandPosition, true);
+                                brandPosition++;
+                            }, 1);
                 } else {
-                    Toast.makeText(DropDownList.this, "All sections are expanded", Toast.LENGTH_SHORT).show();
+                    brandPosition = 0;
+                    brandAdapter.collapseAllGroup();
                 }
                 break;
             }
 
             case "Group": {
                 if (groupPosition < groupAdapter.getGroupCount()) {
-                    groupAdapter.expandGroup(getGroupPosition(), true);
-                    setGroupPosition(groupPosition++);
+                    groupAdapter.collapseAllGroup();
+                    new Handler()
+                            .postDelayed(() -> {
+                                layoutManager.scrollToPositionWithOffset(groupPosition, 0);
+                                groupAdapter.expandGroup(groupPosition, true);
+                                groupPosition++;
+                            }, 1);
                 } else {
-                    Toast.makeText(DropDownList.this, "All sections are expanded", Toast.LENGTH_SHORT).show();
+                    groupPosition = 0;
+                    groupAdapter.collapseAllGroup();
                 }
                 break;
             }
 
             case "Category": {
                 if (categoryPosition < categoryAdapter.getGroupCount()) {
-                    categoryAdapter.expandGroup(getCategoryPosition(), true);
-                    setCategoryPosition(categoryPosition++);
+                    categoryAdapter.collapseAllGroup();
+                    new Handler()
+                            .postDelayed(() -> {
+                                layoutManager.scrollToPositionWithOffset(categoryPosition, 0);
+                                categoryAdapter.expandGroup(categoryPosition, true);
+                                categoryPosition++;
+                            }, 1);
                 } else {
-                    Toast.makeText(DropDownList.this, "All sections are expanded", Toast.LENGTH_SHORT).show();
+                    categoryPosition = 0;
+                    categoryAdapter.collapseAllGroup();
                 }
                 break;
             }
@@ -584,12 +683,11 @@ public class DropDownList extends AppCompatActivity {
 
         switch (SharedPref.getType()) {
             case "Product": {
-                if (productPosition > 0) {
+                if (productPosition > 0 && productPosition <= productAdapter.getGroupCount()) {
                     productPosition--;
                     productAdapter.collapseGroup(productPosition, true);
-                    Log.d("up", "onGroupExpandChange: " + getProductPosition());
                 } else {
-                    Toast.makeText(DropDownList.this, "All sections are collapsed", Toast.LENGTH_SHORT).show();
+                    productPosition = 0;
                 }
                 break;
             }
@@ -599,7 +697,7 @@ public class DropDownList extends AppCompatActivity {
                     brandPosition--;
                     brandAdapter.collapseGroup(brandPosition, true);
                 } else {
-                    Toast.makeText(DropDownList.this, "All sections are collapsed", Toast.LENGTH_SHORT).show();
+                    brandPosition = 0;
                 }
                 break;
             }
@@ -609,7 +707,7 @@ public class DropDownList extends AppCompatActivity {
                     groupPosition--;
                     groupAdapter.collapseGroup(groupPosition, true);
                 } else {
-                    Toast.makeText(DropDownList.this, "All sections are collapsed", Toast.LENGTH_SHORT).show();
+                    groupPosition = 0;
                 }
                 break;
             }
@@ -619,7 +717,7 @@ public class DropDownList extends AppCompatActivity {
                     categoryPosition--;
                     categoryAdapter.collapseGroup(categoryPosition, true);
                 } else {
-                    Toast.makeText(DropDownList.this, "All sections are collapsed", Toast.LENGTH_SHORT).show();
+                    categoryPosition = 0;
                 }
                 break;
             }
@@ -628,9 +726,5 @@ public class DropDownList extends AppCompatActivity {
 
     }
 
-    public static void scrollToPosition(int groPosition)
-    {
-        productAdapter.collapseAllGroup();
-        productAdapter.expandGroup(groPosition, true);
-    }
+
 }

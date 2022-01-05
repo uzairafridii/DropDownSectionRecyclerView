@@ -30,19 +30,15 @@ import pokercc.android.expandablerecyclerview.ExpandableAdapter;
 
 public class StickyGroupAdapter extends ExpandableAdapter<ExpandableAdapter.ViewHolder>
         implements Filterable {
-    ImageLoader imageLoader;
     List<ItemGroup> itemGroupList;
     List<ItemGroup> mFilteredListCopy;
     Context context;
     LinkedHashMap<Integer, Integer> itemDataMap = new LinkedHashMap<>();
-    private int pos;
 
     public StickyGroupAdapter(List<ItemGroup> itemGroupList, Context context) {
         this.itemGroupList = itemGroupList;
         this.mFilteredListCopy = itemGroupList;
         this.context = context;
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(ImageLoaderConfiguration.createDefault(context));
     }
 
     @Override
@@ -93,14 +89,13 @@ public class StickyGroupAdapter extends ExpandableAdapter<ExpandableAdapter.View
                 .diskCacheStrategy(DiskCacheStrategy.DATA)
                 .centerCrop()
                 .into(((ChildViewHolder) viewHolder).itemImage);
-//        imageLoader.displayImage(items.getImageUrl(), ((ChildViewHolder) viewHolder).itemImage);
 
     }
 
     @Override
     protected void onBindGroupViewHolder(ViewHolder viewHolder, int groupPosition, boolean b, List<?> list) {
         ItemGroup itemGroup = itemGroupList.get(groupPosition);
-        ((HeaderViewHolder) viewHolder).headerTitle.setText(itemGroup.getName()
+        ((HeaderViewHolder) viewHolder).headerTitle.setText(groupPosition + 1 +". "+itemGroup.getName()
                 + " (" + getChildCount(groupPosition) + " Skus" + ")");
 
     }
@@ -117,20 +112,7 @@ public class StickyGroupAdapter extends ExpandableAdapter<ExpandableAdapter.View
         return new HeaderViewHolder(mView);
     }
 
-    @Override
-    protected void onGroupExpandChange(int groupPosition, boolean expand) {
-        if (expand) {
-            pos++;
-            DropDownList.setGroupPosition(pos);
-            Log.d("TAG", "onGroupExpandChange: open " + DropDownList.getProductPosition());
-        } else {
-            if(pos > 0) {
-                pos--;
-                DropDownList.setGroupPosition(pos);
-                Log.d("TAG", "onGroupExpandChange: close " + DropDownList.getProductPosition());
-            }
-        }
-    }
+
 
     @Override
     protected void onGroupViewHolderExpandChange(ViewHolder viewHolder, int i, long l, boolean expand) {
@@ -200,7 +182,8 @@ public class StickyGroupAdapter extends ExpandableAdapter<ExpandableAdapter.View
         protected void publishResults(CharSequence constraint, FilterResults filterResults) {
             itemGroupList = (ArrayList<ItemGroup>) filterResults.values;
             notifyDataSetChanged();
-            expandAllGroup();
+            collapseAllGroup();
+            DropDownList.setGroupPosition(0);
         }
     };
 

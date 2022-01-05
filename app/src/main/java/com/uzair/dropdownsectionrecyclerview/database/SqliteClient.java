@@ -23,7 +23,7 @@ import java.util.List;
 
 public class SqliteClient extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "shop.db";
-    public static final int DATABASE_VERSION = 11;
+    public static final int DATABASE_VERSION = 1;
     SQLiteDatabase sqliteDb;
 
 
@@ -51,6 +51,10 @@ public class SqliteClient extends SQLiteOpenHelper {
                 Contracts.Items.COL_BOX_SIZE + " integer, " +
                 Contracts.Items.COL_CTN_SIZE + " integer, " +
                 Contracts.Items.COL_IMAGE_URL + " text, " +
+                Contracts.Items.COL_FREQUENT + " text, " +
+                Contracts.Items.COL_ABOVE_TARGET + " text, " +
+                Contracts.Items.COL_BELOW_TARGET + " text, " +
+                Contracts.Items.COL_MUST_SELL + " text, " +
                 Contracts.Items.COL_PRODUCT_ID + " integer, " +
                 Contracts.Items.COL_BRAND_ID + " text, " +
                 Contracts.Items.COL_GROUP_ID + " text, " +
@@ -93,6 +97,7 @@ public class SqliteClient extends SQLiteOpenHelper {
 
     /**
      * ********** PRODUCT TABLE************
+     *
      * @param product
      */
     public void insertProduct(Product product) {
@@ -149,6 +154,7 @@ public class SqliteClient extends SQLiteOpenHelper {
 
     /**
      * ************ ITEMS TABLE************
+     *
      * @param item
      */
     //////***********/////////////////
@@ -164,6 +170,11 @@ public class SqliteClient extends SQLiteOpenHelper {
         itemContentValue.put(Contracts.Items.COL_GROUP_ID, item.getGroupId());
         itemContentValue.put(Contracts.Items.COL_BRAND_ID, item.getBranId());
         itemContentValue.put(Contracts.Items.COL_SKU_CODE, item.getSkuCode());
+        itemContentValue.put(Contracts.Items.COL_FREQUENT, item.getFrequent());
+        itemContentValue.put(Contracts.Items.COL_ABOVE_TARGET, item.getAbove_target());
+        itemContentValue.put(Contracts.Items.COL_BELOW_TARGET, item.getBelow_target());
+        itemContentValue.put(Contracts.Items.COL_MUST_SELL, item.getMust_sell());
+
         sqliteDb.insert(Contracts.Items.COL_TABLE_NAME, null, itemContentValue);
     }
 
@@ -188,6 +199,10 @@ public class SqliteClient extends SQLiteOpenHelper {
                 items.setCtnSize(cursor.getInt(cursor.getColumnIndexOrThrow(Contracts.Items.COL_CTN_SIZE)));
                 items.setImageUrl(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_IMAGE_URL)));
                 items.setSkuCode(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_SKU_CODE)));
+                items.setFrequent(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_FREQUENT)));
+                items.setMust_sell(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_MUST_SELL)));
+                items.setBelow_target(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_BELOW_TARGET)));
+                items.setAbove_target(cursor.getString(cursor.getColumnIndexOrThrow(Contracts.Items.COL_ABOVE_TARGET)));
 
                 list.add(items);
 

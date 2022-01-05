@@ -24,12 +24,12 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="12dp"
+            android:layout_toLeftOf="@+id/searchView"
             android:layout_toRightOf="@id/moreIcon"
             android:gravity="center"
             android:text="Header"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:paddingRight="12dp"
             />
 
         <androidx.appcompat.widget.SearchView
