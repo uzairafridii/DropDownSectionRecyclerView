@@ -71,7 +71,6 @@ public class StickyCategoryAdapter extends ExpandableAdapter<ExpandableAdapter.V
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
                 if (!s.toString().isEmpty()) {
-                    // edBox.setId(items.getUid());
                     int number = Integer.parseInt(s.toString().trim());
                     itemDataMap.put(items.getUid(), number);
                 }

@@ -618,7 +618,7 @@ public class DropDownList extends AppCompatActivity {
                                 layoutManager.scrollToPositionWithOffset(productPosition, 0);
                                 productAdapter.expandGroup(productPosition, true);
                                 productPosition++;
-                            }, 1);
+                            }, 50);
 
                 } else {
                     productPosition = 0;

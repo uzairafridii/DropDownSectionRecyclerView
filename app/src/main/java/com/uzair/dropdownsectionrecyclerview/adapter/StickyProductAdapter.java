@@ -1,6 +1,5 @@
 package com.uzair.dropdownsectionrecyclerview.adapter;
 
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
@@ -39,7 +38,6 @@ import java.util.concurrent.Executors;
 
 import pokercc.android.expandablerecyclerview.ExpandableAdapter;
 
-
 public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.ViewHolder>
         implements Filterable {
 
@@ -52,6 +50,11 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
         this.productList = productList;
         this.mFilteredListCopy = productList;
         this.context = context;
+    }
+
+    @Override
+    public boolean isGroup(int viewType) {
+        return viewType > 0;
     }
 
     @Override
@@ -126,20 +129,17 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
         return new HeaderViewHolder(mView);
     }
 
-
     @Override
     public long getItemId(int position) {
         return position;
     }
 
-
     @Override
-    protected void onGroupViewHolderExpandChange(ViewHolder viewHolder, int i, long animDuration, boolean expand) {
+    protected void onGroupViewHolderExpandChange(ViewHolder viewHolder, int groupPosition, long animDuration, boolean expand) {
         View arrowImage = ((HeaderViewHolder) viewHolder).mArrow;
         float deg;
-        if (expand) {
-            // rotate icon and change background of selected header
-          //  ((HeaderViewHolder) viewHolder).headerTitle.setBackgroundColor(Color.MAGENTA);
+        // rotate icon
+        if (isExpand(groupPosition)) {
             deg = arrowImage.getRotation() + 180F;
         } else {
             deg = (arrowImage.getRotation() == 180F) ? 0F : 180F;
@@ -204,6 +204,5 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
             DropDownList.setProductPosition(0);
         }
     };
-
 
 }
