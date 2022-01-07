@@ -209,12 +209,19 @@ public class ItemListAdapter extends BaseAdapter implements Filterable {
     }
 
     @Override
-    public int getViewType(int position) {
-        return position;
+    public int getSubheaderViewType(int position) {
+        return super.getSubheaderViewType(position);
     }
 
     @Override
     public long getItemId(int position) {
+        Log.d("uzairItemId", "getItemId: "+position);
+        return position;
+    }
+
+    @Override
+    public int getViewType(int position) {
+        Log.d("viewTypeUzair", "getViewType: "+position);
         return position;
     }
 

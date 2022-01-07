@@ -2,6 +2,11 @@ package com.uzair.dropdownsectionrecyclerview.utils;
 
 public class Contracts {
 
+    public static class DataSet {
+        public static final String COL_TABLE_NAME = "dataset";
+        public static final String COL_ID = "id";
+        public static final String COL_VALUE = "value";
+    }
 
     public static class ProductsBrand {
         public static final String COL_TABLE_NAME = "products_brand";
@@ -19,8 +24,6 @@ public class Contracts {
         public static final String COL_STATUS = "status";
         public static final String COL_PRODUCT_UID = "product_id";
     }
-
-
 
     public static class Items {
         public static final String COL_TABLE_NAME = "items";

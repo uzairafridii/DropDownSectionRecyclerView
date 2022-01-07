@@ -23,7 +23,7 @@ import java.util.List;
 
 public class SqliteClient extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "shop.db";
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 10;
     SQLiteDatabase sqliteDb;
 
 
@@ -81,6 +81,11 @@ public class SqliteClient extends SQLiteOpenHelper {
                 " ( " + Contracts.ProductCategory.COL_CATEGORY_UID + " integer primary key UNIQUE, "
                 + Contracts.ProductCategory.COL_CATEGORY_NAME + " text ); ");
 
+        // create table data set for item values storage
+        sqliteDb.execSQL("create table " + Contracts.DataSet.COL_TABLE_NAME + "" +
+                " ( " + Contracts.DataSet.COL_ID + " integer primary key, " +
+                Contracts.DataSet.COL_VALUE + " text );");
+
     }
 
     @Override
@@ -91,6 +96,7 @@ public class SqliteClient extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + Contracts.Items.COL_TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Contracts.ItemGroup.COL_TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Contracts.ProductCategory.COL_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Contracts.DataSet.COL_TABLE_NAME);
 
         onCreate(db);
     }
@@ -570,6 +576,92 @@ public class SqliteClient extends SQLiteOpenHelper {
 
         cursor.close();
         return productId;
+    }
+
+
+    /**
+     * ******** DATA SET TABLE CRUD *********** //////
+     */
+
+    public void insertDataSet(int id, int value) {
+        sqliteDb = this.getWritableDatabase();
+        ContentValues dataSetCv = new ContentValues();
+        dataSetCv.put(Contracts.DataSet.COL_ID, id);
+        dataSetCv.put(Contracts.DataSet.COL_VALUE, value);
+
+        sqliteDb.insert(Contracts.DataSet.COL_TABLE_NAME, null, dataSetCv);
+
+    }
+
+    public List<Integer> getDataSetIdList() {
+        List<Integer> idList = new ArrayList<>();
+        sqliteDb = this.getReadableDatabase();
+        Cursor dataSetCursor = sqliteDb.rawQuery(" select * from " + Contracts.DataSet.COL_TABLE_NAME, null);
+
+        if (dataSetCursor.moveToFirst()) {
+            do {
+                idList.add(dataSetCursor.getInt(dataSetCursor.getColumnIndexOrThrow(Contracts.DataSet.COL_ID)));
+            } while (dataSetCursor.moveToNext());
+        }
+
+
+        dataSetCursor.close();
+        return idList;
+    }
+
+    public Integer getDataSetValueById(int id) {
+        int result = 0;
+        sqliteDb = this.getReadableDatabase();
+        Cursor dataCursor = sqliteDb.rawQuery("select * from " + Contracts.DataSet.COL_TABLE_NAME +
+                " where " + Contracts.DataSet.COL_ID + " =? ", new String[]{String.valueOf(id)});
+        if (dataCursor.moveToFirst()) {
+            do {
+                result = dataCursor.getInt(dataCursor.getColumnIndexOrThrow(Contracts.DataSet.COL_VALUE));
+
+            } while (dataCursor.moveToNext());
+        }
+
+        return result;
+    }
+
+    public Integer getDataSetId(int id) {
+        int result = 0;
+        sqliteDb = this.getReadableDatabase();
+        Cursor dataCursor = sqliteDb.rawQuery("select * from " + Contracts.DataSet.COL_TABLE_NAME +
+                " where " + Contracts.DataSet.COL_ID + " =? ", new String[]{String.valueOf(id)});
+        if (dataCursor.moveToFirst()) {
+            do {
+                result = dataCursor.getInt(dataCursor.getColumnIndexOrThrow(Contracts.DataSet.COL_ID));
+
+            } while (dataCursor.moveToNext());
+        }
+
+        return result;
+    }
+
+    public void updateDataSetValue(int id, int value) {
+        sqliteDb = this.getWritableDatabase();
+        ContentValues updateDataSet = new ContentValues();
+        updateDataSet.put(Contracts.DataSet.COL_ID, id);
+        updateDataSet.put(Contracts.DataSet.COL_VALUE, value);
+
+        sqliteDb.update(Contracts.DataSet.COL_TABLE_NAME, updateDataSet, Contracts.DataSet.COL_ID + " =? ", new String[]{String.valueOf(id)});
+
+    }
+
+
+    public void deleteDataSetValueById(int id) {
+        sqliteDb = this.getWritableDatabase();
+        String whereClause = "id=?";
+        String whereArgs[] = {String.valueOf(id)};
+        sqliteDb.delete(Contracts.DataSet.COL_TABLE_NAME, whereClause, whereArgs);
+
+    }
+
+    public void deleteAllDataSet() {
+        sqliteDb = this.getWritableDatabase();
+        sqliteDb.execSQL("delete from " + Contracts.DataSet.COL_TABLE_NAME);
+        sqliteDb.close();
     }
 
 

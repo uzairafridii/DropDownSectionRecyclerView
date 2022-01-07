@@ -17,6 +17,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.uzair.dropdownsectionrecyclerview.R;
 import com.uzair.dropdownsectionrecyclerview.activity.DropDownList;
+import com.uzair.dropdownsectionrecyclerview.database.SqliteClient;
 import com.uzair.dropdownsectionrecyclerview.model.Items;
 import com.uzair.dropdownsectionrecyclerview.model.ProductBrand;
 import com.uzair.dropdownsectionrecyclerview.viewholders.ChildViewHolder;
@@ -29,17 +30,20 @@ import java.util.List;
 import pokercc.android.expandablerecyclerview.ExpandableAdapter;
 
 public class StickyBrandAdapter extends ExpandableAdapter<ExpandableAdapter.ViewHolder>
-implements Filterable
-{
+        implements Filterable {
     private Context context;
     private List<ProductBrand> brandList;
     private List<ProductBrand> mFilteredListCopy;
     private LinkedHashMap<Integer, Integer> itemDataMap = new LinkedHashMap<>();
+    List<Integer> dataSetIdList;
+    SqliteClient sqliteClient;
 
     public StickyBrandAdapter(List<ProductBrand> brandList, Context context) {
         this.brandList = brandList;
         this.mFilteredListCopy = brandList;
         this.context = context;
+        sqliteClient = new SqliteClient(context);
+        dataSetIdList = sqliteClient.getDataSetIdList();
     }
 
     @Override
@@ -55,43 +59,79 @@ implements Filterable
     @Override
     protected void onBindChildViewHolder(ViewHolder viewHolder, int groupPosition, int chilPosition, List<?> list) {
 
-        Items items = brandList.get(groupPosition).getItemsList().get(chilPosition);
-
-        if (itemDataMap.containsKey(items.getUid())) {
-            ((ChildViewHolder) viewHolder).edBox.setText("" + itemDataMap.get(items.getUid()));
-        }
-
-        Log.d("tagUzair", "onBindChildViewHolder: " + items.getUid() + " : " + chilPosition);
-        /// text change listener on edBox
-        ((ChildViewHolder) viewHolder).edBox.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        if (list.isEmpty()) {
+            Items items = brandList.get(groupPosition).getItemsList().get(chilPosition);
+            // check item id
+            if (sqliteClient.getDataSetId(items.getUid()) == items.getUid()) {
+                ((ChildViewHolder) viewHolder).setEdBox(sqliteClient.getDataSetValueById(items.getUid()));
+            } else {
+                ((ChildViewHolder) viewHolder).edBox.setText("");
             }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            // remove text watcher
+            if (((ChildViewHolder) viewHolder).editTextWatcher != null) {
+                ((ChildViewHolder) viewHolder).edBox.removeTextChangedListener(((ChildViewHolder) viewHolder).editTextWatcher);
+            }
+            /// set item values
+            ((ChildViewHolder) viewHolder).availableStock.setText("Stock Available : " + items.getBoxSize());
+            ((ChildViewHolder) viewHolder).itemName.setText(items.getItemName());
+            ((ChildViewHolder) viewHolder).itemSqCode.setText("SKU Code : " + items.getSkuCode());
 
-                if (!s.toString().isEmpty()) {
-                    int number = Integer.parseInt(s.toString().trim());
-                    itemDataMap.put(items.getUid(), number);
+            // add image
+            Glide.with(context)
+                    .load(items.getImageUrl())
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
+                    .centerCrop()
+                    .into(((ChildViewHolder) viewHolder).itemImage);
+
+            /// focus to get complete text
+            ((ChildViewHolder) viewHolder).edBox.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (!hasFocus && !((ChildViewHolder) viewHolder).edBox.getText().toString().trim().isEmpty()) {
+                        int number = Integer.parseInt(((ChildViewHolder) viewHolder).edBox.getText().toString().trim());
+                        // check for value in table
+                        if (!dataSetIdList.contains(items.getUid())) {
+                            sqliteClient.insertDataSet(items.getUid(), number);
+                        } else {
+                            // update the value
+                            sqliteClient.updateDataSetValue(items.getUid(), number);
+                        }
+                    } else if (!hasFocus && ((ChildViewHolder) viewHolder).edBox.getText().toString().trim().isEmpty()) {
+                        // delete data
+                        sqliteClient.deleteDataSetValueById(items.getUid());
+                    }
                 }
-            }
+            });
 
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
 
-        /// set item values
-        ((ChildViewHolder) viewHolder).availableStock.setText("Stock Available : " + items.getBoxSize());
-        ((ChildViewHolder) viewHolder).itemName.setText(items.getItemName());
-        ((ChildViewHolder) viewHolder).itemSqCode.setText("SKU Code : " + items.getSkuCode());
+            /// text change listener on edBox
+            ((ChildViewHolder) viewHolder).editTextWatcher = new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
 
-        Glide.with(context)
-                .load(items.getImageUrl())
-                .diskCacheStrategy(DiskCacheStrategy.DATA)
-                .centerCrop()
-                .into(((ChildViewHolder) viewHolder).itemImage);
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if (!s.toString().isEmpty()) {
+                        // edBox.setId(items.getUid());
+                        int number = Integer.parseInt(s.toString().trim());
+                        itemDataMap.put(items.getUid(), number);
+
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            };
+
+            // add text watcher to new item
+            ((ChildViewHolder) viewHolder).edBox.addTextChangedListener(((ChildViewHolder) viewHolder).editTextWatcher);
+
+
+        }
 
 
     }
@@ -99,7 +139,7 @@ implements Filterable
     @Override
     protected void onBindGroupViewHolder(ViewHolder viewHolder, int groupPosition, boolean expand, List<?> list) {
         ProductBrand product = brandList.get(groupPosition);
-        ((HeaderViewHolder) viewHolder).headerTitle.setText(groupPosition + 1 +". "+product.getName() +
+        ((HeaderViewHolder) viewHolder).headerTitle.setText(groupPosition + 1 + ". " + product.getName() +
                 "  (" + getChildCount(groupPosition) + " Skus)");
     }
 

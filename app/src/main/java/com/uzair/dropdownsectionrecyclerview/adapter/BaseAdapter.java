@@ -30,7 +30,7 @@ public abstract class BaseAdapter extends SectionedRecyclerViewAdapter<BaseAdapt
 
     @Override
     public ItemView onCreateItemViewHolder(ViewGroup parent, int viewType) {
-        return new ItemView(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout, null));
+        return new ItemView(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout, null));
     }
 
     @Override
