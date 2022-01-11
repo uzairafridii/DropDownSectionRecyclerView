@@ -60,53 +60,148 @@ public class StickyBrandAdapter extends ExpandableAdapter<ExpandableAdapter.View
     protected void onBindChildViewHolder(ViewHolder viewHolder, int groupPosition, int chilPosition, List<?> list) {
 
         if (list.isEmpty()) {
-            Items items = brandList.get(groupPosition).getItemsList().get(chilPosition);
-            // check item id
-            if (sqliteClient.getDataSetId(items.getUid()) == items.getUid()) {
-                ((ChildViewHolder) viewHolder).setEdBox(sqliteClient.getDataSetValueById(items.getUid()));
-            } else {
-                ((ChildViewHolder) viewHolder).edBox.setText("");
-            }
 
-            // remove text watcher
-            if (((ChildViewHolder) viewHolder).editTextWatcher != null) {
-                ((ChildViewHolder) viewHolder).edBox.removeTextChangedListener(((ChildViewHolder) viewHolder).editTextWatcher);
-            }
-            /// set item values
+            Items items = brandList.get(groupPosition).getItemsList().get(chilPosition);
+            /**
+             ****************** SET VALUES IN TEXT FILED
+             */
             ((ChildViewHolder) viewHolder).availableStock.setText("Stock Available : " + items.getBoxSize());
             ((ChildViewHolder) viewHolder).itemName.setText(items.getItemName());
             ((ChildViewHolder) viewHolder).itemSqCode.setText("SKU Code : " + items.getSkuCode());
 
-            // add image
+            /**
+             ****************** SET IMAGE
+             */
             Glide.with(context)
                     .load(items.getImageUrl())
                     .diskCacheStrategy(DiskCacheStrategy.DATA)
                     .centerCrop()
                     .into(((ChildViewHolder) viewHolder).itemImage);
 
-            /// focus to get complete text
-            ((ChildViewHolder) viewHolder).edBox.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+            /**
+             * ********** CHECK ITEM ID IN DB
+             */
+            if (sqliteClient.getDataSetId(items.getUid()) == items.getUid()) {
+                ((ChildViewHolder) viewHolder).setEdBox(sqliteClient.getBoxValueById(items.getUid()));
+                ((ChildViewHolder) viewHolder).setEdCtn(sqliteClient.getCtnValueById(items.getUid()));
+                ((ChildViewHolder) viewHolder).setEdPcs(sqliteClient.getPcsValueById(items.getUid()));
+
+            } else {
+                ((ChildViewHolder) viewHolder).edBox.setText("");
+                ((ChildViewHolder) viewHolder).edCtn.setText("");
+                ((ChildViewHolder) viewHolder).edPcs.setText("");
+            }
+
+            /**
+             ************ REMOVE TEXT WATCHER
+             */
+            if (((ChildViewHolder) viewHolder).boxTextWatcher != null) {
+                ((ChildViewHolder) viewHolder).edBox.removeTextChangedListener(((ChildViewHolder) viewHolder).boxTextWatcher);
+            }
+            if (((ChildViewHolder) viewHolder).ctnTextWatcher != null) {
+                ((ChildViewHolder) viewHolder).edCtn.removeTextChangedListener(((ChildViewHolder) viewHolder).ctnTextWatcher);
+            }
+            if (((ChildViewHolder) viewHolder).pcsTextWatcher != null) {
+                ((ChildViewHolder) viewHolder).edPcs.removeTextChangedListener(((ChildViewHolder) viewHolder).pcsTextWatcher);
+            }
+
+
+            /**
+             ************ PCS EDIT TEXT FOCUS CHANGE LISTENER ******************
+             */
+            ((ChildViewHolder) viewHolder).edPcs.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
-                    if (!hasFocus && !((ChildViewHolder) viewHolder).edBox.getText().toString().trim().isEmpty()) {
-                        int number = Integer.parseInt(((ChildViewHolder) viewHolder).edBox.getText().toString().trim());
+
+                    dataSetIdList = sqliteClient.getDataSetIdList();
+                    int total = 0;
+                    if (!hasFocus && !((ChildViewHolder) viewHolder).edPcs.getText().toString().trim().isEmpty()) {
+                        int number = Integer.parseInt(((ChildViewHolder) viewHolder).edPcs.getText().toString().trim());
+
+                        // get total from pcs total textview
+                        if (!((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim().isEmpty()) {
+                            total = Integer.parseInt(((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim());
+                        }
                         // check for value in table
                         if (!dataSetIdList.contains(items.getUid())) {
-                            sqliteClient.insertDataSet(items.getUid(), number);
+                            sqliteClient.insertDataSet(items.getUid(), 0, 0, number, total);
+
                         } else {
                             // update the value
-                            sqliteClient.updateDataSetValue(items.getUid(), number);
+                            sqliteClient.updatePcsValue(items.getUid(), number, total);
                         }
-                    } else if (!hasFocus && ((ChildViewHolder) viewHolder).edBox.getText().toString().trim().isEmpty()) {
+                    } else if (!hasFocus && ((ChildViewHolder) viewHolder).edPcs.getText().toString().trim().isEmpty()) {
                         // delete data
-                        sqliteClient.deleteDataSetValueById(items.getUid());
+                        sqliteClient.updatePcsValue(items.getUid(), 0, total);
+                    }
+
+                }
+            });
+
+            /**
+             ************ CTN EDIT TEXT FOCUS CHANGE LISTENER ******************
+             */
+            ((ChildViewHolder) viewHolder).edCtn.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    dataSetIdList = sqliteClient.getDataSetIdList();
+                    int total = 0;
+                    if (!hasFocus && !((ChildViewHolder) viewHolder).edCtn.getText().toString().trim().isEmpty()) {
+                        int number = Integer.parseInt(((ChildViewHolder) viewHolder).edCtn.getText().toString().trim());
+                        // get total from pcs total textview
+                        if (!((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim().isEmpty()) {
+                            total = Integer.parseInt(((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim());
+                        }
+                        // check for value in table
+                        if (!dataSetIdList.contains(items.getUid())) {
+                            sqliteClient.insertDataSet(items.getUid(), 0, number, 0, total);
+
+                        } else {
+                            // update the value
+                            sqliteClient.updateCtnValue(items.getUid(), number, total);
+                        }
+                    } else if (!hasFocus && ((ChildViewHolder) viewHolder).edCtn.getText().toString().trim().isEmpty()) {
+                        // delete data
+                        sqliteClient.updateCtnValue(items.getUid(), 0, total);
                     }
                 }
             });
 
 
-            /// text change listener on edBox
-            ((ChildViewHolder) viewHolder).editTextWatcher = new TextWatcher() {
+            /**
+             ************ BOX EDIT TEXT FOCUS CHANGE LISTENER ******************
+             */
+            ((ChildViewHolder) viewHolder).edBox.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    dataSetIdList = sqliteClient.getDataSetIdList();
+                    int total = 0;
+                    if (!hasFocus && !((ChildViewHolder) viewHolder).edBox.getText().toString().trim().isEmpty()) {
+                        int number = Integer.parseInt(((ChildViewHolder) viewHolder).edBox.getText().toString().trim());
+                        // get total from pcs total textview
+                        if (!((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim().isEmpty()) {
+                            total = Integer.parseInt(((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim());
+                        }
+                        // check for value in table
+                        if (!dataSetIdList.contains(items.getUid())) {
+                            sqliteClient.insertDataSet(items.getUid(), number, 0, 0, total);
+                        } else {
+                            // update the value
+                            sqliteClient.updateBoxValue(items.getUid(), number, total);
+                        }
+                    } else if (!hasFocus && ((ChildViewHolder) viewHolder).edBox.getText().toString().trim().isEmpty()) {
+                        // delete data
+                        sqliteClient.updateBoxValue(items.getUid(), 0, total);
+                    }
+                }
+            });
+
+            /**
+             *    text change listener on edBox
+             */
+            /// edittext box text watcher
+            ((ChildViewHolder) viewHolder).boxTextWatcher = new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 }
@@ -114,9 +209,15 @@ public class StickyBrandAdapter extends ExpandableAdapter<ExpandableAdapter.View
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     if (!s.toString().isEmpty()) {
-                        // edBox.setId(items.getUid());
                         int number = Integer.parseInt(s.toString().trim());
-                        itemDataMap.put(items.getUid(), number);
+                        int boxTotal = number * items.getBoxSize();
+                        int total = 0;
+                        if (!((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim().isEmpty()) {
+                            total = Integer.parseInt(((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim());
+                        }
+                        int pcsTotal = total + boxTotal;
+                        ((ChildViewHolder) viewHolder).totalPcsValue.setText("" + pcsTotal);
+
 
                     }
                 }
@@ -126,9 +227,67 @@ public class StickyBrandAdapter extends ExpandableAdapter<ExpandableAdapter.View
 
                 }
             };
+            /// edittext pcs text watcher
+            ((ChildViewHolder) viewHolder).pcsTextWatcher = new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
 
-            // add text watcher to new item
-            ((ChildViewHolder) viewHolder).edBox.addTextChangedListener(((ChildViewHolder) viewHolder).editTextWatcher);
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if (!s.toString().isEmpty()) {
+                        int number = Integer.parseInt(s.toString().trim());
+                        int total = 0;
+                        if (!((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim().isEmpty()) {
+                            total = Integer.parseInt(((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim());
+                        }
+                        int pcsTotal = total + number;
+                        itemDataMap.put(items.getUid(), number);
+
+                        ((ChildViewHolder) viewHolder).totalPcsValue.setText("" + pcsTotal);
+
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            };
+            /// edittext ctn text watcher
+            ((ChildViewHolder) viewHolder).ctnTextWatcher = new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if (!s.toString().isEmpty()) {
+                        int number = Integer.parseInt(s.toString().trim());
+                        int ctnTotal = number * items.getCtnSize();
+                        int total = 0;
+                        if (!((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim().isEmpty()) {
+                            total = Integer.parseInt(((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim());
+                        }
+                        int pcsTotal = total + ctnTotal;
+                        itemDataMap.put(items.getUid(), number);
+
+                        ((ChildViewHolder) viewHolder).totalPcsValue.setText("" + pcsTotal);
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            };
+
+            /**
+             * add text watcher to new item
+             */
+            ((ChildViewHolder) viewHolder).edCtn.addTextChangedListener(((ChildViewHolder) viewHolder).ctnTextWatcher);
+            ((ChildViewHolder) viewHolder).edPcs.addTextChangedListener(((ChildViewHolder) viewHolder).pcsTextWatcher);
+            ((ChildViewHolder) viewHolder).edBox.addTextChangedListener(((ChildViewHolder) viewHolder).boxTextWatcher);
 
 
         }
@@ -226,7 +385,7 @@ public class StickyBrandAdapter extends ExpandableAdapter<ExpandableAdapter.View
             brandList = (ArrayList<ProductBrand>) filterResults.values;
             notifyDataSetChanged();
             collapseAllGroup();
-            DropDownList.setBrandPosition(0);
+            DropDownList.setBrandPosition(-1);
         }
     };
 

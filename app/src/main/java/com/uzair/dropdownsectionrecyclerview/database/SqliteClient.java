@@ -19,11 +19,12 @@ import com.uzair.dropdownsectionrecyclerview.model.ProductItem;
 import com.uzair.dropdownsectionrecyclerview.utils.Contracts;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class SqliteClient extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "shop.db";
-    public static final int DATABASE_VERSION = 10;
+    public static final int DATABASE_VERSION = 11;
     SQLiteDatabase sqliteDb;
 
 
@@ -84,7 +85,10 @@ public class SqliteClient extends SQLiteOpenHelper {
         // create table data set for item values storage
         sqliteDb.execSQL("create table " + Contracts.DataSet.COL_TABLE_NAME + "" +
                 " ( " + Contracts.DataSet.COL_ID + " integer primary key, " +
-                Contracts.DataSet.COL_VALUE + " text );");
+                Contracts.DataSet.COL_CTN + " text, " +
+                Contracts.DataSet.COL_PCS + " text, " +
+                Contracts.DataSet.COL_TOTAL + " text, " +
+                Contracts.DataSet.COL_BOX + " text );");
 
     }
 
@@ -583,14 +587,34 @@ public class SqliteClient extends SQLiteOpenHelper {
      * ******** DATA SET TABLE CRUD *********** //////
      */
 
-    public void insertDataSet(int id, int value) {
+    public void insertDataSet(int id, int box, int ctn, int pcs, int total) {
         sqliteDb = this.getWritableDatabase();
         ContentValues dataSetCv = new ContentValues();
         dataSetCv.put(Contracts.DataSet.COL_ID, id);
-        dataSetCv.put(Contracts.DataSet.COL_VALUE, value);
+        dataSetCv.put(Contracts.DataSet.COL_BOX, box);
+        dataSetCv.put(Contracts.DataSet.COL_CTN, ctn);
+        dataSetCv.put(Contracts.DataSet.COL_PCS, pcs);
+        dataSetCv.put(Contracts.DataSet.COL_TOTAL, total);
 
         sqliteDb.insert(Contracts.DataSet.COL_TABLE_NAME, null, dataSetCv);
 
+    }
+
+    public HashMap<Integer, Integer> getHashMapOfDataSet() {
+        HashMap<Integer, Integer> totalMap = new HashMap<>();
+        sqliteDb = this.getReadableDatabase();
+        Cursor dataSetCursor = sqliteDb.rawQuery(" select * from " + Contracts.DataSet.COL_TABLE_NAME, null);
+
+        if (dataSetCursor.moveToFirst()) {
+            do {
+                totalMap.put(dataSetCursor.getInt(dataSetCursor.getColumnIndexOrThrow(Contracts.DataSet.COL_ID))
+                        , dataSetCursor.getInt(dataSetCursor.getColumnIndexOrThrow(Contracts.DataSet.COL_TOTAL)));
+            } while (dataSetCursor.moveToNext());
+        }
+
+
+        dataSetCursor.close();
+        return totalMap;
     }
 
     public List<Integer> getDataSetIdList() {
@@ -609,14 +633,60 @@ public class SqliteClient extends SQLiteOpenHelper {
         return idList;
     }
 
-    public Integer getDataSetValueById(int id) {
+    public Integer getTotalValueById(int id)
+    {
         int result = 0;
         sqliteDb = this.getReadableDatabase();
         Cursor dataCursor = sqliteDb.rawQuery("select * from " + Contracts.DataSet.COL_TABLE_NAME +
                 " where " + Contracts.DataSet.COL_ID + " =? ", new String[]{String.valueOf(id)});
         if (dataCursor.moveToFirst()) {
             do {
-                result = dataCursor.getInt(dataCursor.getColumnIndexOrThrow(Contracts.DataSet.COL_VALUE));
+                result = dataCursor.getInt(dataCursor.getColumnIndexOrThrow(Contracts.DataSet.COL_TOTAL));
+
+            } while (dataCursor.moveToNext());
+        }
+
+        return result;
+    }
+
+    public Integer getBoxValueById(int id) {
+        int result = 0;
+        sqliteDb = this.getReadableDatabase();
+        Cursor dataCursor = sqliteDb.rawQuery("select * from " + Contracts.DataSet.COL_TABLE_NAME +
+                " where " + Contracts.DataSet.COL_ID + " =? ", new String[]{String.valueOf(id)});
+        if (dataCursor.moveToFirst()) {
+            do {
+                result = dataCursor.getInt(dataCursor.getColumnIndexOrThrow(Contracts.DataSet.COL_BOX));
+
+            } while (dataCursor.moveToNext());
+        }
+
+        return result;
+    }
+
+    public Integer getCtnValueById(int id) {
+        int result = 0;
+        sqliteDb = this.getReadableDatabase();
+        Cursor dataCursor = sqliteDb.rawQuery("select * from " + Contracts.DataSet.COL_TABLE_NAME +
+                " where " + Contracts.DataSet.COL_ID + " =? ", new String[]{String.valueOf(id)});
+        if (dataCursor.moveToFirst()) {
+            do {
+                result = dataCursor.getInt(dataCursor.getColumnIndexOrThrow(Contracts.DataSet.COL_CTN));
+
+            } while (dataCursor.moveToNext());
+        }
+
+        return result;
+    }
+
+    public Integer getPcsValueById(int id) {
+        int result = 0;
+        sqliteDb = this.getReadableDatabase();
+        Cursor dataCursor = sqliteDb.rawQuery("select * from " + Contracts.DataSet.COL_TABLE_NAME +
+                " where " + Contracts.DataSet.COL_ID + " =? ", new String[]{String.valueOf(id)});
+        if (dataCursor.moveToFirst()) {
+            do {
+                result = dataCursor.getInt(dataCursor.getColumnIndexOrThrow(Contracts.DataSet.COL_PCS));
 
             } while (dataCursor.moveToNext());
         }
@@ -639,11 +709,34 @@ public class SqliteClient extends SQLiteOpenHelper {
         return result;
     }
 
-    public void updateDataSetValue(int id, int value) {
+    public void updateBoxValue(int id, int value, int total) {
         sqliteDb = this.getWritableDatabase();
         ContentValues updateDataSet = new ContentValues();
         updateDataSet.put(Contracts.DataSet.COL_ID, id);
-        updateDataSet.put(Contracts.DataSet.COL_VALUE, value);
+        updateDataSet.put(Contracts.DataSet.COL_BOX, value);
+        updateDataSet.put(Contracts.DataSet.COL_TOTAL, total);
+
+        sqliteDb.update(Contracts.DataSet.COL_TABLE_NAME, updateDataSet, Contracts.DataSet.COL_ID + " =? ", new String[]{String.valueOf(id)});
+
+    }
+
+    public void updateCtnValue(int id, int value, int total) {
+        sqliteDb = this.getWritableDatabase();
+        ContentValues updateDataSet = new ContentValues();
+        updateDataSet.put(Contracts.DataSet.COL_ID, id);
+        updateDataSet.put(Contracts.DataSet.COL_CTN, value);
+        updateDataSet.put(Contracts.DataSet.COL_TOTAL, total);
+
+        sqliteDb.update(Contracts.DataSet.COL_TABLE_NAME, updateDataSet, Contracts.DataSet.COL_ID + " =? ", new String[]{String.valueOf(id)});
+
+    }
+
+    public void updatePcsValue(int id, int value, int total) {
+        sqliteDb = this.getWritableDatabase();
+        ContentValues updateDataSet = new ContentValues();
+        updateDataSet.put(Contracts.DataSet.COL_ID, id);
+        updateDataSet.put(Contracts.DataSet.COL_PCS, value);
+        updateDataSet.put(Contracts.DataSet.COL_TOTAL, total);
 
         sqliteDb.update(Contracts.DataSet.COL_TABLE_NAME, updateDataSet, Contracts.DataSet.COL_ID + " =? ", new String[]{String.valueOf(id)});
 

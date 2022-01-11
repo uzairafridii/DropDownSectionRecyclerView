@@ -5,7 +5,10 @@ public class Contracts {
     public static class DataSet {
         public static final String COL_TABLE_NAME = "dataset";
         public static final String COL_ID = "id";
-        public static final String COL_VALUE = "value";
+        public static final String COL_BOX = "box";
+        public static final String COL_CTN = "ctn";
+        public static final String COL_PCS = "pcs";
+        public static final String COL_TOTAL = "total";
     }
 
     public static class ProductsBrand {

@@ -36,9 +36,13 @@ import com.uzair.dropdownsectionrecyclerview.model.ProductCategory;
 import com.uzair.dropdownsectionrecyclerview.model.ProductItem;
 import com.uzair.dropdownsectionrecyclerview.utils.Contracts;
 import com.uzair.dropdownsectionrecyclerview.utils.SharedPref;
+import com.uzair.dropdownsectionrecyclerview.viewholders.ChildViewHolder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import pokercc.android.expandablerecyclerview.ExpandableRecyclerView;
 
@@ -65,7 +69,7 @@ public class DropDownList extends AppCompatActivity {
     StickyBrandAdapter brandAdapter;
     StickyGroupAdapter groupAdapter;
     StickyCategoryAdapter categoryAdapter;
-    public static int productPosition, brandPosition, groupPosition, categoryPosition;
+    public static int productPosition = -1, brandPosition = -1, groupPosition = -1, categoryPosition = -1;
     //bottom sheet
     LinearLayout bottomSheetLayout;
     BottomSheetBehavior bottomSheetBehavior;
@@ -370,21 +374,25 @@ public class DropDownList extends AppCompatActivity {
 
         product.setOnClickListener(v -> {
             setHeaderTitle("Product");
+            resetPosition();
             setUpProductAdapter();
         });
 
         category.setOnClickListener(v -> {
             setHeaderTitle("Category");
+            resetPosition();
             setUpCategoryAdapter();
         });
 
         brand.setOnClickListener(v -> {
             setHeaderTitle("Brand");
+            resetPosition();
             setUpBrandAdapter();
         });
 
         group.setOnClickListener(v -> {
             setHeaderTitle("Group");
+            resetPosition();
             setUpGroupAdapter();
         });
 
@@ -409,6 +417,14 @@ public class DropDownList extends AppCompatActivity {
         });
 
 
+    }
+
+    // set all position to zero
+    private void resetPosition() {
+        setProductPosition(-1);
+        setBrandPosition(-1);
+        setGroupPosition(-1);
+        setCategoryPosition(-1);
     }
 
     // title
@@ -615,13 +631,17 @@ public class DropDownList extends AppCompatActivity {
                     productAdapter.collapseAllGroup();
                     new Handler()
                             .postDelayed(() -> {
-                                layoutManager.scrollToPositionWithOffset(productPosition, 0);
-                                productAdapter.expandGroup(productPosition, true);
                                 productPosition++;
-                            }, 50);
+                                if (productPosition < productAdapter.getGroupCount()) {
+                                    layoutManager.scrollToPositionWithOffset(productPosition, 0);
+                                    productAdapter.expandGroup(productPosition, true);
+                                }
+
+
+                            }, 10);
 
                 } else {
-                    productPosition = 0;
+                    productPosition = -1;
                     productAdapter.collapseAllGroup();
                 }
                 break;
@@ -631,44 +651,48 @@ public class DropDownList extends AppCompatActivity {
                     brandAdapter.collapseAllGroup();
                     new Handler()
                             .postDelayed(() -> {
-                                layoutManager.scrollToPositionWithOffset(brandPosition, 0);
-                                brandAdapter.expandGroup(brandPosition, true);
                                 brandPosition++;
-                            }, 1);
+                                if (brandPosition < brandAdapter.getGroupCount()) {
+                                    layoutManager.scrollToPositionWithOffset(brandPosition, 0);
+                                    brandAdapter.expandGroup(brandPosition, true);
+                                }
+                            }, 10);
                 } else {
-                    brandPosition = 0;
+                    brandPosition = -1;
                     brandAdapter.collapseAllGroup();
                 }
                 break;
             }
-
             case "Group": {
                 if (groupPosition < groupAdapter.getGroupCount()) {
                     groupAdapter.collapseAllGroup();
                     new Handler()
                             .postDelayed(() -> {
-                                layoutManager.scrollToPositionWithOffset(groupPosition, 0);
-                                groupAdapter.expandGroup(groupPosition, true);
                                 groupPosition++;
-                            }, 1);
+                                if (groupPosition < groupAdapter.getGroupCount()) {
+                                    layoutManager.scrollToPositionWithOffset(groupPosition, 0);
+                                    groupAdapter.expandGroup(groupPosition, true);
+                                }
+                            }, 10);
                 } else {
-                    groupPosition = 0;
+                    groupPosition = -1;
                     groupAdapter.collapseAllGroup();
                 }
                 break;
             }
-
             case "Category": {
                 if (categoryPosition < categoryAdapter.getGroupCount()) {
                     categoryAdapter.collapseAllGroup();
                     new Handler()
                             .postDelayed(() -> {
-                                layoutManager.scrollToPositionWithOffset(categoryPosition, 0);
-                                categoryAdapter.expandGroup(categoryPosition, true);
                                 categoryPosition++;
-                            }, 1);
+                                if (categoryPosition < categoryAdapter.getGroupCount()) {
+                                    layoutManager.scrollToPositionWithOffset(categoryPosition, 0);
+                                    categoryAdapter.expandGroup(categoryPosition, true);
+                                }
+                            }, 10);
                 } else {
-                    categoryPosition = 0;
+                    categoryPosition = -1;
                     categoryAdapter.collapseAllGroup();
                 }
                 break;
@@ -684,41 +708,81 @@ public class DropDownList extends AppCompatActivity {
         switch (SharedPref.getType()) {
             case "Product": {
                 if (productPosition > 0 && productPosition <= productAdapter.getGroupCount()) {
-                    productPosition--;
-                    productAdapter.collapseGroup(productPosition, true);
+                    productAdapter.collapseAllGroup();
+                    new Handler()
+                            .postDelayed(() -> {
+                                productPosition--;
+                                Log.d("product", "btnUp: " + productPosition);
+                                layoutManager.scrollToPositionWithOffset(productPosition, 0);
+                                productAdapter.expandGroup(productPosition, true);
+                            }, 10);
+
                 } else {
-                    productPosition = 0;
+                    if (productPosition == 0)
+                        productAdapter.collapseGroup(productPosition, true);
+                    productPosition = -1;
                 }
                 break;
             }
 
             case "Brand": {
-                if (brandPosition > 0) {
-                    brandPosition--;
-                    brandAdapter.collapseGroup(brandPosition, true);
+                if (brandPosition > 0 && brandPosition <= brandAdapter.getGroupCount()) {
+                    brandAdapter.collapseAllGroup();
+                    new Handler()
+                            .postDelayed(() -> {
+                                brandPosition--;
+                                layoutManager.scrollToPositionWithOffset(brandPosition, 0);
+                                brandAdapter.expandGroup(brandPosition, true);
+                            }, 10);
+
+
                 } else {
-                    brandPosition = 0;
+                    if (brandPosition == 0)
+                        brandAdapter.collapseGroup(brandPosition, true);
+                    brandPosition = -1;
                 }
+
                 break;
             }
 
             case "Group": {
-                if (groupPosition > 0) {
-                    groupPosition--;
-                    groupAdapter.collapseGroup(groupPosition, true);
+
+                if (groupPosition > 0 && groupPosition <= groupAdapter.getGroupCount()) {
+                    groupAdapter.collapseAllGroup();
+                    new Handler()
+                            .postDelayed(() -> {
+                                groupPosition--;
+                                layoutManager.scrollToPositionWithOffset(groupPosition, 0);
+                                groupAdapter.expandGroup(groupPosition, true);
+                            }, 10);
+
                 } else {
-                    groupPosition = 0;
+                    if (groupPosition == 0)
+                        groupAdapter.collapseGroup(groupPosition, true);
+                    groupPosition = -1;
                 }
+
                 break;
             }
 
             case "Category": {
-                if (categoryPosition > 0) {
-                    categoryPosition--;
-                    categoryAdapter.collapseGroup(categoryPosition, true);
+
+                if (categoryPosition > 0 && categoryPosition <= categoryAdapter.getGroupCount()) {
+                    categoryAdapter.collapseAllGroup();
+                    new Handler()
+                            .postDelayed(() -> {
+                                categoryPosition--;
+                                layoutManager.scrollToPositionWithOffset(categoryPosition, 0);
+                                categoryAdapter.expandGroup(categoryPosition, true);
+                            }, 10);
+
                 } else {
-                    categoryPosition = 0;
+                    if (categoryPosition == 0)
+                        categoryAdapter.collapseGroup(categoryPosition, true);
+                    categoryPosition = -1;
                 }
+
+
                 break;
             }
         }
@@ -726,5 +790,16 @@ public class DropDownList extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        client.deleteAllDataSet();
+    }
 
+    public void continueBtn(View view) {
+        HashMap<Integer, Integer> itemMap = client.getHashMapOfDataSet();
+        for (Map.Entry<Integer, Integer> itemData : itemMap.entrySet()) {
+            Log.d("itemCtn", "continueBtn: " + itemData.getKey() + " : " + itemData.getValue());
+        }
+    }
 }
