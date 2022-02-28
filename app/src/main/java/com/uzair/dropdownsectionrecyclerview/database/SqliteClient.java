@@ -742,7 +742,6 @@ public class SqliteClient extends SQLiteOpenHelper {
 
     }
 
-
     public void deleteDataSetValueById(int id) {
         sqliteDb = this.getWritableDatabase();
         String whereClause = "id=?";

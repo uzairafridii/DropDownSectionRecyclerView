@@ -1,15 +1,20 @@
 package com.uzair.dropdownsectionrecyclerview.adapter;
 
 import android.content.Context;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -64,7 +69,7 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
         if (list.isEmpty()) {
             Items items = productList.get(groupPosition).getItemsList().get(chilPosition);
             /**
-             ****************** SET VALUES IN TEXT FILED
+             ****************** SET VALUES IN TEXT FIELDS
              */
             ((ChildViewHolder) viewHolder).availableStock.setText("Stock Available : " + items.getBoxSize());
             ((ChildViewHolder) viewHolder).itemName.setText(items.getItemName());
@@ -179,7 +184,6 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
                 }
             });
 
-
             /**
              ************ BOX EDIT TEXT FOCUS CHANGE LISTENER ******************
              */
@@ -218,27 +222,37 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
              */
             /// edittext box text watcher
             ((ChildViewHolder) viewHolder).boxTextWatcher = new TextWatcher() {
+                int number = 0;
+                int total = 0;
+                int boxTotal;
+
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     if (!s.toString().isEmpty()) {
-                        int number = Integer.parseInt(s.toString().trim());
-                        int boxTotal = number * items.getBoxSize();
-                        int total = 0;
+                        number = Integer.parseInt(s.toString().trim());
+                        boxTotal = number * items.getBoxSize();
                         if (!((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim().isEmpty()) {
                             total = Integer.parseInt(((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim());
                         }
                         int pcsTotal = total + boxTotal;
                         ((ChildViewHolder) viewHolder).totalPcsValue.setText("" + pcsTotal);
 
+                    } else if (s.toString().length() == 0) {
+                        if (total > boxTotal) {
+                            int pcsTotal = total - boxTotal;
+                            ((ChildViewHolder) viewHolder).totalPcsValue.setText("" + pcsTotal);
+                        }
                     }
                 }
 
                 @Override
-                public void afterTextChanged(Editable s) {}
+                public void afterTextChanged(Editable s) {
+                }
             };
+
             /// edittext pcs text watcher
             ((ChildViewHolder) viewHolder).pcsTextWatcher = new TextWatcher() {
                 int total = 0;
@@ -259,11 +273,13 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
                         ((ChildViewHolder) viewHolder).totalPcsValue.setText("" + total);
 
                     } else if (s.length() == 0) {
-                        if (!((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim().isEmpty()) {
-                            total = Integer.parseInt(((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim());
+//                        if (!((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim().isEmpty()) {
+//                            total = Integer.parseInt(((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim());
+//                        }
+                        if (total > number) {
+                            total = total - number;
+                            ((ChildViewHolder) viewHolder).totalPcsValue.setText("" + total);
                         }
-                        total = total - number;
-                        ((ChildViewHolder) viewHolder).totalPcsValue.setText("" + total);
                     }
                 }
 
@@ -274,30 +290,38 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
 
             /// edittext ctn text watcher
             ((ChildViewHolder) viewHolder).ctnTextWatcher = new TextWatcher() {
+                int number, ctnTotal, total;
+
                 @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
+
                     if (!s.toString().isEmpty()) {
-                        int number = Integer.parseInt(s.toString().trim());
-                        int ctnTotal = number * items.getCtnSize();
-                        int total = 0;
+                        number = Integer.parseInt(s.toString().trim());
+                        ctnTotal = number * items.getCtnSize();
+
                         if (!((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim().isEmpty()) {
                             total = Integer.parseInt(((ChildViewHolder) viewHolder).totalPcsValue.getText().toString().trim());
                         }
-                        int pcsTotal = total + ctnTotal;
 
+                        int pcsTotal = total + ctnTotal;
                         ((ChildViewHolder) viewHolder).totalPcsValue.setText("" + pcsTotal);
+
                     } else if (s.length() == 0) {
 
+                        if (total > ctnTotal) {
+                            int pcsTotal = total - ctnTotal;
+                            ((ChildViewHolder) viewHolder).totalPcsValue.setText("" + pcsTotal);
+                        }
                     }
+
+
                 }
 
                 @Override
                 public void afterTextChanged(Editable s) {
-
                 }
             };
 
@@ -309,8 +333,37 @@ public class StickyProductAdapter extends ExpandableAdapter<ExpandableAdapter.Vi
             ((ChildViewHolder) viewHolder).edBox.addTextChangedListener(((ChildViewHolder) viewHolder).boxTextWatcher);
 
 
+            //// testing to clear the focus of edittext on back button click
+            ((ChildViewHolder) viewHolder).edPcs.setOnKeyListener(new View.OnKeyListener() {
+                public boolean onKey(View view, int keyCode, KeyEvent event) {
+                    if (keyCode == event.KEYCODE_BACK) {
+                        Toast.makeText(context, "click", Toast.LENGTH_SHORT).show();
+                        ((ChildViewHolder) viewHolder).clearFocus();
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            });
+
         }
     }
+
+
+//    private void idleTyping(final int currentLen) {
+//        final Handler handler = new Handler();
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                int newLen = mEditTextChat.getText().length();
+//                if (currentLen == newLen) {
+//                    //  stopTyping();
+//                }
+//
+//            }
+//        }, 800);
+//    }
+//
 
     @Override
     protected void onBindGroupViewHolder(ViewHolder viewHolder, int groupPosition, boolean expand, List<?> list) {

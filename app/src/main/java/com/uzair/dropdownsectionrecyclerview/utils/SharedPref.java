@@ -21,6 +21,19 @@ public class SharedPref
     }
 
     public static String getType() {
+
         return mSharedPref.getString("type","Product");
+    }
+
+    public static void setLanguage(String language)
+    {
+        SharedPreferences.Editor prefsEditor = mSharedPref.edit();
+        prefsEditor.putString("lang", language);
+        prefsEditor.commit();
+    }
+
+    public static String getLanguage()
+    {
+        return mSharedPref.getString("lang","en");
     }
 }

@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">DropDownSectionRecyclerView</string>
+
+    <string name="available_stock">Available Stock</string>
+
     <string name="subheader">%s (%s)</string>
+    <string name="box">Box</string>
     <plurals name="item">
         <item quantity="one">%d Sku</item>
         <item quantity="other">%d Skus</item>

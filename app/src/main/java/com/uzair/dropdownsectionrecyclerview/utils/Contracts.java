@@ -43,6 +43,8 @@ public class Contracts {
         public static final String COL_MUST_SELL = "must_sell";
         public static final String COL_ABOVE_TARGET = "above_target";
         public static final String COL_BELOW_TARGET = "below_target";
+        public static final String COL_CATEGORY_UID = "category_id";
+        public static final String COL_CATEGORY_NAME = "category_name";
     }
 
 

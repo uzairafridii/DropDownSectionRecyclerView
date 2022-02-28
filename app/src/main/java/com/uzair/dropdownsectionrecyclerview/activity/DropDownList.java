@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -42,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import pokercc.android.expandablerecyclerview.ExpandableRecyclerView;
@@ -75,6 +78,7 @@ public class DropDownList extends AppCompatActivity {
     BottomSheetBehavior bottomSheetBehavior;
     TextView title;
     static Button btnDown;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -309,8 +313,6 @@ public class DropDownList extends AppCompatActivity {
             );
 
             pBrandCompleteList.add(productBrand);
-
-
         }
 
         // Add items to group list according group id
@@ -801,5 +803,40 @@ public class DropDownList extends AppCompatActivity {
         for (Map.Entry<Integer, Integer> itemData : itemMap.entrySet()) {
             Log.d("itemCtn", "continueBtn: " + itemData.getKey() + " : " + itemData.getValue());
         }
+    }
+
+
+    /// language methods
+    public void langBtn(View view) {
+        String lang = SharedPref.getLanguage();
+        if (lang.equals("en")) {
+            SharedPref.setLanguage("ur");
+        } else {
+            SharedPref.setLanguage("en");
+        }
+
+        Locale locale = new Locale(lang);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        getBaseContext().getResources().updateConfiguration(config,
+                getBaseContext().getResources().getDisplayMetrics());
+        this.finish();
+        Intent refresh = new Intent(this, DropDownList.class);
+        startActivity(refresh);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String lang = SharedPref.getLanguage();
+        Locale locale = new Locale(lang);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        getBaseContext().getResources().updateConfiguration(config,
+                getBaseContext().getResources().getDisplayMetrics());
+
     }
 }

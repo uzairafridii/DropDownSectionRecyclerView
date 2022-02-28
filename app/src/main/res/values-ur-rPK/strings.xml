@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DropDownSectionRecyclerView</string>
+    <string name="subheader">%s (%s)</string>
+    <string name="available_stock">دستیاب اسٹاک</string>
+    <string name="box">ڈبہ</string>
+</resources>

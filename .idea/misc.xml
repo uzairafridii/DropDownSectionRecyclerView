@@ -7,9 +7,12 @@
         <entry key="..\:/Projects/IVY Projects/DropDownSectionRecyclerView/app/src/main/res/drawable/ic_baseline_keyboard_arrow_down_24.xml" value="0.2203125" />
         <entry key="..\:/Projects/IVY Projects/DropDownSectionRecyclerView/app/src/main/res/layout/activity_drop_down_list.xml" value="0.20416666666666666" />
         <entry key="..\:/Projects/IVY Projects/DropDownSectionRecyclerView/app/src/main/res/layout/bottom_sheet_btn.xml" value="0.20416666666666666" />
+        <entry key="..\:/Projects/IVY Projects/DropDownSectionRecyclerView/app/src/main/res/layout/drop_down_item.xml" value="0.22447916666666667" />
+        <entry key="..\:/Projects/IVY Projects/DropDownSectionRecyclerView/app/src/main/res/layout/group_item.xml" value="0.22447916666666667" />
         <entry key="..\:/Projects/IVY Projects/DropDownSectionRecyclerView/app/src/main/res/layout/header_layout.xml" value="0.20416666666666666" />
         <entry key="..\:/Projects/IVY Projects/DropDownSectionRecyclerView/app/src/main/res/layout/item_layout.xml" value="0.20416666666666666" />
         <entry key="..\:/Projects/IVY Projects/DropDownSectionRecyclerView/app/src/main/res/layout/layout.xml" value="0.20416666666666666" />
+        <entry key="..\:/Projects/IVY Projects/DropDownSectionRecyclerView/app/src/main/res/layout/sticky_header_layout.xml" value="0.22447916666666667" />
       </map>
     </option>
   </component>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/black">
+
+    <ImageView
+        android:id="@+id/itemImage"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="5dp"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <TextView
+        android:id="@+id/itemSqCode"
+        android:layout_width="195dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="1dp"
+        android:layout_toRightOf="@+id/itemImage"
+        android:paddingHorizontal="5dp"
+        android:paddingVertical="2dp"
+        android:text="Sku Code"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/white" />
+
+    <TextView
+        android:id="@+id/itemName"
+        android:layout_width="195dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/itemSqCode"
+        android:layout_marginEnd="1dp"
+        android:layout_toRightOf="@id/itemImage"
+        android:paddingHorizontal="5dp"
+        android:paddingVertical="2dp"
+        android:text="Item Name"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/white" />
+
+    <TextView
+        android:id="@+id/availableStock"
+        android:layout_width="195dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/boxLayout"
+        android:layout_marginEnd="1dp"
+        android:layout_toRightOf="@id/itemImage"
+        android:paddingHorizontal="5dp"
+        android:paddingVertical="2dp"
+        android:text="@string/available_stock"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/white" />
+
+
+    <LinearLayout
+        android:id="@+id/boxTextLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/boxLayout"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/itemPcs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="1dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="9dp"
+            android:text="Pcs"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/itemCtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="1dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="6dp"
+            android:text="Ctn"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/itemBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="1dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="6dp"
+            android:text="@string/box"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@color/white" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/boxLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/white"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/edPcs"
+            android:layout_width="93dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:digits="1234567890"
+            android:inputType="phone"
+            android:padding="4dp" />
+
+
+        <EditText
+            android:id="@+id/edCtn"
+            android:layout_width="93dp"
+            android:layout_height="match_parent"
+            android:digits="1234567890"
+            android:inputType="phone"
+            android:padding="4dp" />
+
+
+        <EditText
+            android:id="@+id/edBox"
+            android:layout_width="93dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:digits="1234567890"
+            android:inputType="phone"
+            android:padding="4dp" />
+
+
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/totalPcs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/boxLayout"
+        android:layout_marginEnd="1dp"
+        android:layout_toLeftOf="@+id/boxLayout"
+        android:paddingHorizontal="5dp"
+        android:paddingVertical="2dp"
+        android:text="T.Pcs"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/white" />
+
+    <TextView
+        android:id="@+id/totalPcsValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/boxLayout"
+        android:layout_marginEnd="1dp"
+        android:layout_toRightOf="@+id/totalPcs"
+        android:paddingVertical="2dp"
+        android:text=""
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/white" />
+
+
+</RelativeLayout>
